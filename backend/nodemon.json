@@ -1,0 +1,9 @@
+{
+  "watch": ["src", "server.js"],
+  "ext": "js,json",
+  "ignore": ["src/data/*", "data/*", "uploads/*", "*.test.js"],
+  "delay": "500",
+  "env": {
+    "NODE_ENV": "development"
+  }
+}

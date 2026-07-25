@@ -1,0 +1,16 @@
+{
+  "name": "esports-platform-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Esports Tournament Platform Monorepo Workspace",
+  "scripts": {
+    "dev:backend": "cd backend && npm run dev",
+    "dev:user": "cd user-frontend && npm run dev",
+    "dev:admin": "cd admin-frontend && npm run dev",
+    "install:all": "npm --prefix backend install && npm --prefix user-frontend install && npm --prefix admin-frontend install",
+    "dev:all": "concurrently \"npm run dev:backend\" \"npm run dev:user\" \"npm run dev:admin\""
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  }
+}
