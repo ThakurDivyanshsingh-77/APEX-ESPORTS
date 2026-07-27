@@ -617,10 +617,13 @@ All 6 critical bugs in the Admin ↔ User data sync pipeline were found and fixe
 
 ## 8. Environment & Deployment Notes
 
-### Port Allocations
-- **Backend Service**: `http://localhost:5000`
+### Deployed & Local Endpoints
+- **Render Backend Service (Deployed)**: `https://apex-esports.onrender.com/api/v1`
+- **Local Backend Service (Dev)**: `http://localhost:5000/api/v1`
 - **User Frontend App**: `http://localhost:3000`
 - **Admin Frontend App**: `http://localhost:3001`
+
+> Both local execution (`http://localhost:5000`) and production deployment (`https://apex-esports.onrender.com`) are fully configured across `user-frontend` and `admin-frontend` API/Socket clients.
 
 ### Useful Commands
 ```bash

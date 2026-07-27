@@ -39,7 +39,16 @@ export const ToastProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   useEffect(() => {
     if (!user) return;
 
-    const socketUrl = process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000';
+    const getSocketUrl = () => {
+      if (process.env.NEXT_PUBLIC_SOCKET_URL) return process.env.NEXT_PUBLIC_SOCKET_URL;
+      if (process.env.NEXT_PUBLIC_API_URL) return process.env.NEXT_PUBLIC_API_URL.replace('/api/v1', '');
+      if (typeof window !== 'undefined' && window.location.hostname !== 'localhost' && window.location.hostname !== '127.0.0.1') {
+        return 'https://apex-esports.onrender.com';
+      }
+      return 'http://localhost:5000';
+    };
+
+    const socketUrl = getSocketUrl();
     const socket: Socket = io(socketUrl, {
       transports: ['websocket', 'polling'],
       autoConnect: true,
