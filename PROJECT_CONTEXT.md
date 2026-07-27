@@ -627,6 +627,16 @@ All 6 critical bugs in the Admin ↔ User data sync pipeline were found and fixe
 
 > Both local execution (`http://localhost:5000`) and production deployment (`https://apex-esports.onrender.com`) are fully configured across `user-frontend` and `admin-frontend` API/Socket clients.
 
+### Vercel Deployment Configuration
+- Added **[vercel.json](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/vercel.json)** in root workspace directory:
+  ```json
+  {
+    "buildCommand": "cd user-frontend && npm run build",
+    "outputDirectory": "user-frontend/.next"
+  }
+  ```
+- Added `"build": "cd user-frontend && npm run build"` in root **[package.json](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/package.json)** so Vercel monorepo deployments build and serve `user-frontend` automatically.
+
 ### Useful Commands
 ```bash
 # Install all dependencies across monorepo

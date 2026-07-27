@@ -1,0 +1,4 @@
+{
+  "buildCommand": "cd user-frontend && npm run build",
+  "outputDirectory": "user-frontend/.next"
+}
