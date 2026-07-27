@@ -190,7 +190,7 @@ export default function AdminDisputesPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#090D16] text-[#FAFAFA] flex selection:bg-[#DFE104] selection:text-black">
+    <div className="min-h-screen bg-[#090D16] text-[#FAFAFA] flex flex-col md:flex-row selection:bg-[#DFE104] selection:text-black">
       <AdminSidebar />
 
       <main className="flex-1 p-8 space-y-8 overflow-y-auto">

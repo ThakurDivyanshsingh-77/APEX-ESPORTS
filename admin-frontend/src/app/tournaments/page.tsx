@@ -87,22 +87,22 @@ export default function AdminTournamentsPage() {
 
   const [formData, setFormData] = useState({
     title: '',
-    game: '',
-    mode: '',
+    game: 'Valorant',
+    mode: 'SQUAD',
     entryFee: 0,
-    prizePool: '',
+    prizePool: '₹10,000',
     winnerCount: '3' as '1' | '2' | '3',
-    firstPrize: 0,
-    secondPrize: 0,
-    thirdPrize: 0,
-    slots: 0,
-    date: '',
-    time: '',
-    map: '',
+    firstPrize: 5000,
+    secondPrize: 3000,
+    thirdPrize: 2000,
+    slots: 64,
+    date: new Date().toISOString().split('T')[0],
+    time: '18:00',
+    map: 'Haven',
     roomID: '',
     password: '',
     bannerImage: '',
-    description: '',
+    description: 'Official Esports Tournament.',
   });
 
   const fetchTournaments = async () => {
@@ -244,22 +244,22 @@ export default function AdminTournamentsPage() {
     setEditingId(null);
     setFormData({
       title: '',
-      game: '',
-      mode: '',
+      game: 'Valorant',
+      mode: 'SQUAD',
       entryFee: 0,
-      prizePool: '',
+      prizePool: '₹10,000',
       winnerCount: '3',
-      firstPrize: 0,
-      secondPrize: 0,
-      thirdPrize: 0,
-      slots: 0,
-      date: '',
-      time: '',
-      map: '',
+      firstPrize: 5000,
+      secondPrize: 3000,
+      thirdPrize: 2000,
+      slots: 64,
+      date: new Date().toISOString().split('T')[0],
+      time: '18:00',
+      map: 'Haven',
       roomID: '',
       password: '',
       bannerImage: '',
-      description: '',
+      description: 'Official Esports Tournament.',
     });
     setIsModalOpen(true);
   };
@@ -438,7 +438,7 @@ export default function AdminTournamentsPage() {
   });
 
   return (
-    <div className="min-h-screen bg-[#09090B] text-[#FAFAFA] flex">
+    <div className="min-h-screen bg-[#09090B] text-[#FAFAFA] flex flex-col md:flex-row">
       <AdminSidebar activePath="/tournaments" />
 
       <main className="flex-1 p-6 sm:p-8 w-full overflow-x-hidden">

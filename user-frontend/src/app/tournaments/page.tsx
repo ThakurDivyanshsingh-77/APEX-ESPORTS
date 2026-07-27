@@ -8,6 +8,7 @@ import api from '@/lib/api';
 
 import { useAuth } from '@/context/AuthContext';
 import { useRouter } from 'next/navigation';
+import PacmanLoader from '@/components/PacmanLoader';
 
 export interface Tournament {
   _id: string;
@@ -16,6 +17,12 @@ export interface Tournament {
   mode: string;
   entryFee: number;
   prizePool: string;
+  winnerCount?: '1' | '2' | '3' | string;
+  prizeBreakdown?: {
+    first?: number;
+    second?: number;
+    third?: number;
+  };
   slots: number;
   filledSlots: number;
   date: string;
@@ -138,9 +145,8 @@ export default function TournamentsPage() {
 
         {/* Loading State */}
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 text-[#F7931A]">
-            <Loader2 className="h-10 w-10 animate-spin mb-4 stroke-[2]" />
-            <span className="text-xs font-mono font-bold uppercase tracking-wider text-[#94A3B8]">LOADING ARENA MATCHES...</span>
+          <div className="py-16">
+            <PacmanLoader text="LOADING ARENA MATCHES..." />
           </div>
         ) : filteredTournaments.length === 0 ? (
           <div className="bg-[#0F1115] border border-white/10 rounded-3xl p-16 text-center text-[#94A3B8] font-mono font-bold uppercase">

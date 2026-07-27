@@ -185,7 +185,7 @@ export default function AdminUsersPage() {
   });
 
   return (
-    <div className="min-h-screen flex bg-slate-900 text-slate-100">
+    <div className="min-h-screen flex flex-col md:flex-row bg-slate-900 text-slate-100">
       <AdminSidebar />
 
       <main className="flex-1 p-8 overflow-y-auto">

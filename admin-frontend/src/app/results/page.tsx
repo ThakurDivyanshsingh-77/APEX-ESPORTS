@@ -333,7 +333,7 @@ export default function AdminResultsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex">
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col md:flex-row">
       <AdminSidebar />
 
       <main className="flex-1 p-8 max-w-[1600px]">

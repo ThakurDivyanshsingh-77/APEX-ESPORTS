@@ -52,6 +52,7 @@ const submitTournamentResult = asyncHandler(async (req, res) => {
     // Mark tournament status as COMPLETED
     await Tournament.findByIdAndUpdate(tournamentId, {
       status: 'COMPLETED',
+      completedAt: new Date(),
       registrationOpen: false,
     });
 
@@ -608,6 +609,7 @@ const publishTournamentResult = asyncHandler(async (req, res) => {
     // Mark tournament as COMPLETED
     await Tournament.findByIdAndUpdate(tournamentId, {
       status: 'COMPLETED',
+      completedAt: new Date(),
       registrationOpen: false,
     });
 

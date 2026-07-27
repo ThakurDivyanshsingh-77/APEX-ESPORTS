@@ -91,6 +91,9 @@ const tournamentSchema = new mongoose.Schema(
       },
     ],
 
+    completedAt: {
+      type: Date,
+    },
     bannerImage: {
       type: String,
       default: 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=80',
@@ -108,6 +111,13 @@ const tournamentSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+tournamentSchema.pre('save', function (next) {
+  if (this.isModified('status') && this.status === 'COMPLETED' && !this.completedAt) {
+    this.completedAt = new Date();
+  }
+  next();
+});
 
 tournamentSchema.index({ status: 1, game: 1, createdAt: -1 });
 

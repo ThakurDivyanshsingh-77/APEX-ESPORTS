@@ -5,11 +5,14 @@ import api from '@/lib/api';
 
 export interface User {
   id: string;
+  _id?: string;
   name: string;
   email: string;
   phone: string;
   gameName?: string;
   gameUID?: string;
+  preferredGame?: string;
+  preferredRole?: string;
   role: string;
   profileImage: string;
   status: string;

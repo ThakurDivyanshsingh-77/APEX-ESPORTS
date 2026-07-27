@@ -201,7 +201,7 @@ export default function AdminDashboard() {
   });
 
   return (
-    <div className="min-h-screen flex bg-[#09090B] text-[#FAFAFA]">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#09090B] text-[#FAFAFA]">
       <AdminSidebar />
 
       {/* Main Content */}

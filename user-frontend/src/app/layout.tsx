@@ -3,6 +3,7 @@ import { Space_Grotesk, Inter } from 'next/font/google';
 import './globals.css';
 import QueryProvider from '@/providers/QueryProvider';
 import { AuthProvider } from '@/context/AuthContext';
+import { ToastProvider } from '@/context/ToastContext';
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],
@@ -37,7 +38,9 @@ export default function RootLayout({
       <body className="bg-[#09090B] text-[#FAFAFA] antialiased selection:bg-[#DFE104] selection:text-black font-sans">
         <Script src="https://accounts.google.com/gsi/client" strategy="afterInteractive" />
         <AuthProvider>
-          <QueryProvider>{children}</QueryProvider>
+          <ToastProvider>
+            <QueryProvider>{children}</QueryProvider>
+          </ToastProvider>
         </AuthProvider>
       </body>
     </html>

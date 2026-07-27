@@ -16,9 +16,20 @@ interface ChatMessage {
 interface LiveChatProps {
   tournamentId: string;
   tournamentTitle: string;
+  isRegistered?: boolean;
+  tournamentStatus?: string;
+  completedAt?: string | Date;
+  updatedAt?: string | Date;
 }
 
-export default function LiveChat({ tournamentId, tournamentTitle }: LiveChatProps) {
+export default function LiveChat({
+  tournamentId,
+  tournamentTitle,
+  isRegistered = false,
+  tournamentStatus,
+  completedAt,
+  updatedAt,
+}: LiveChatProps) {
   const { user } = useAuth();
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -31,7 +42,29 @@ export default function LiveChat({ tournamentId, tournamentTitle }: LiveChatProp
   ]);
   const [inputMessage, setInputMessage] = useState('');
   const [socket, setSocket] = useState<Socket | null>(null);
-  const chatEndRef = useRef<HTMLDivElement | null>(null);
+  const [isChatExpired, setIsChatExpired] = useState(false);
+  const messagesContainerRef = useRef<HTMLDivElement | null>(null);
+
+  // Check 5-minute post-completion expiry rule
+  useEffect(() => {
+    const checkExpiry = () => {
+      if (tournamentStatus === 'COMPLETED') {
+        const compTime = completedAt || updatedAt;
+        if (compTime) {
+          const elapsed = Date.now() - new Date(compTime).getTime();
+          if (elapsed > 5 * 60 * 1000) {
+            setIsChatExpired(true);
+            return;
+          }
+        }
+      }
+      setIsChatExpired(false);
+    };
+
+    checkExpiry();
+    const interval = setInterval(checkExpiry, 5000);
+    return () => clearInterval(interval);
+  }, [tournamentStatus, completedAt, updatedAt]);
 
   useEffect(() => {
     const s = io(process.env.NEXT_PUBLIC_SOCKET_URL || 'http://localhost:5000', {
@@ -53,16 +86,22 @@ export default function LiveChat({ tournamentId, tournamentTitle }: LiveChatProp
     };
   }, [tournamentId]);
 
+  // Scroll internal container only, preventing full-window scroll jumping
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTop = messagesContainerRef.current.scrollHeight;
+    }
   }, [messages]);
+
+  const canChat = !!user && isRegistered && !isChatExpired;
 
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!inputMessage.trim()) return;
+    if (!canChat || !inputMessage.trim()) return;
 
     const msgPayload = {
       room: tournamentId,
+      userId: user?._id || user?.id,
       user: user?.gameName || user?.name || 'Anonymous Gamer',
       avatar: user?.profileImage,
       message: inputMessage.trim(),
@@ -88,6 +127,13 @@ export default function LiveChat({ tournamentId, tournamentTitle }: LiveChatProp
     setInputMessage('');
   };
 
+  const getPlaceholderText = () => {
+    if (isChatExpired) return 'CHAT CLOSED (5 MINUTES POST MATCH COMPLETION)';
+    if (!user) return 'LOGIN & REGISTER TO PARTICIPATE IN LOBBY CHAT';
+    if (!isRegistered) return 'ONLY REGISTERED PARTICIPANTS CAN CHAT IN THIS LOBBY';
+    return 'SEND A LOBBY CHAT MESSAGE...';
+  };
+
   return (
     <div className="bg-[#0D1117]/80 border border-white/10 rounded-3xl p-6 relative overflow-hidden flex flex-col h-[480px] backdrop-blur-xl shadow-xl">
       {/* Header */}
@@ -102,14 +148,29 @@ export default function LiveChat({ tournamentId, tournamentTitle }: LiveChatProp
           </div>
         </div>
 
-        <div className="flex items-center space-x-2 text-xs text-[#DFE104] font-bold uppercase bg-[#DFE104]/10 border border-[#DFE104]/30 px-3 py-1 rounded-full">
-          <span className="h-2 w-2 rounded-full bg-[#DFE104] animate-pulse" />
-          <span>SOCKET CONNECTED</span>
-        </div>
+        {isChatExpired ? (
+          <div className="flex items-center space-x-2 text-xs text-red-400 font-bold uppercase bg-red-500/10 border border-red-500/30 px-3 py-1 rounded-full">
+            <span className="h-2 w-2 rounded-full bg-red-500" />
+            <span>CHAT CLOSED (5M EXPIRED)</span>
+          </div>
+        ) : !isRegistered ? (
+          <div className="flex items-center space-x-2 text-xs text-amber-400 font-bold uppercase bg-amber-500/10 border border-amber-500/30 px-3 py-1 rounded-full">
+            <span className="h-2 w-2 rounded-full bg-amber-500" />
+            <span>REGISTERED ONLY</span>
+          </div>
+        ) : (
+          <div className="flex items-center space-x-2 text-xs text-[#DFE104] font-bold uppercase bg-[#DFE104]/10 border border-[#DFE104]/30 px-3 py-1 rounded-full">
+            <span className="h-2 w-2 rounded-full bg-[#DFE104] animate-pulse" />
+            <span>SOCKET CONNECTED</span>
+          </div>
+        )}
       </div>
 
       {/* Messages Feed */}
-      <div className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-thin scrollbar-thumb-white/10">
+      <div
+        ref={messagesContainerRef}
+        className="flex-1 overflow-y-auto space-y-3 pr-2 scrollbar-thin scrollbar-thumb-white/10"
+      >
         {messages.map((msg) => (
           <div key={msg.id} className="flex items-start space-x-3 text-xs">
             <img
@@ -126,21 +187,33 @@ export default function LiveChat({ tournamentId, tournamentTitle }: LiveChatProp
             </div>
           </div>
         ))}
-        <div ref={chatEndRef} />
       </div>
 
+      {/* Access Control Notice Banner if disabled */}
+      {!canChat && (
+        <div className="mt-3 px-4 py-2 rounded-xl bg-white/5 border border-white/10 text-[11px] font-bold uppercase text-amber-400 text-center tracking-wide">
+          {isChatExpired
+            ? 'Chat disabled: 5 minutes have passed since tournament completion.'
+            : !user
+            ? 'Please login and join tournament to participate in chat.'
+            : 'Only registered participants of this tournament can send chat messages.'}
+        </div>
+      )}
+
       {/* Message Input Form */}
-      <form onSubmit={handleSendMessage} className="mt-4 pt-3 border-t border-white/10 flex items-center gap-2 shrink-0">
+      <form onSubmit={handleSendMessage} className="mt-3 pt-3 border-t border-white/10 flex items-center gap-2 shrink-0">
         <input
           type="text"
           value={inputMessage}
+          disabled={!canChat}
           onChange={(e) => setInputMessage(e.target.value)}
-          placeholder="SEND A LOBBY CHAT MESSAGE..."
-          className="flex-1 bg-white/5 border border-white/15 rounded-xl py-2.5 px-4 text-xs font-bold text-[#FAFAFA] placeholder-[#94A3B8]/60 focus:outline-none focus:border-[#DFE104] uppercase transition-all"
+          placeholder={getPlaceholderText()}
+          className="flex-1 bg-white/5 border border-white/15 rounded-xl py-2.5 px-4 text-xs font-bold text-[#FAFAFA] placeholder-[#94A3B8]/60 focus:outline-none focus:border-[#DFE104] uppercase transition-all disabled:opacity-50 disabled:cursor-not-allowed"
         />
         <button
           type="submit"
-          className="p-3 bg-[#DFE104] text-black font-bold rounded-xl hover:scale-105 transition-all shadow-md shadow-[#DFE104]/25"
+          disabled={!canChat}
+          className="p-3 bg-[#DFE104] text-black font-bold rounded-xl hover:scale-105 transition-all shadow-md shadow-[#DFE104]/25 disabled:opacity-40 disabled:hover:scale-100 disabled:cursor-not-allowed"
         >
           <Send className="h-4 w-4 stroke-[2.5]" />
         </button>

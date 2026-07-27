@@ -27,6 +27,8 @@ const formatUserResponse = (user) => {
     phone: user.phone,
     gameName: user.gameName || '',
     gameUID: user.gameUID || '',
+    preferredGame: user.preferredGame || 'Free Fire',
+    preferredRole: user.preferredRole || 'Assaulter',
     role: user.role,
     profileImage: user.profileImage,
     status: user.status,
@@ -565,13 +567,15 @@ const getProfile = asyncHandler(async (req, res) => {
  * @access  Private
  */
 const updateProfile = asyncHandler(async (req, res) => {
-  const { name, phone, gameName, gameUID } = req.body;
+  const { name, phone, gameName, gameUID, preferredGame, preferredRole } = req.body;
   const user = req.user;
 
   if (name) user.name = name;
   if (phone) user.phone = phone;
   if (gameName !== undefined) user.gameName = gameName;
   if (gameUID !== undefined) user.gameUID = gameUID;
+  if (preferredGame !== undefined) user.preferredGame = preferredGame;
+  if (preferredRole !== undefined) user.preferredRole = preferredRole;
 
   let uploadedProfileFile = req.file;
   if (req.files?.profileImage?.[0]) {
@@ -612,6 +616,8 @@ const updateProfile = asyncHandler(async (req, res) => {
         phone: user.phone,
         gameName: user.gameName,
         gameUID: user.gameUID,
+        preferredGame: user.preferredGame,
+        preferredRole: user.preferredRole,
         profileImage: user.profileImage || existingMockUser.profileImage,
       };
       mockUsers.set(user.email, updatedUser);

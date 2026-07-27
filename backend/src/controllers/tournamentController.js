@@ -53,90 +53,71 @@ const createTournament = asyncHandler(async (req, res) => {
 
   const parsedWinnerCount = ['1', '2', '3'].includes(String(winnerCount)) ? String(winnerCount) : '3';
   const parsedBreakdown = prizeBreakdown || { first: 0, second: 0, third: 0 };
+  const createdByVal = req.user?._id && mongoose.Types.ObjectId.isValid(req.user._id) ? req.user._id : undefined;
 
-  if (mongoose.connection.readyState !== 1) {
-    const mockId = 'mock-t-' + Date.now();
-    const mockObj = {
-      _id: mockId,
-      title,
-      game,
-      mode: mode || 'SQUAD',
-      entryFee: Number(entryFee) || 0,
-      prizePool,
-      winnerCount: parsedWinnerCount,
-      prizeBreakdown: parsedBreakdown,
-      slots: Number(slots),
-      filledSlots: 0,
-      date,
-      time,
-      map: map || 'TBD',
-      status: 'UPCOMING',
-      registrationOpen: true,
-      roomID: '',
-      password: '',
-      bannerImage: bannerImage || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=80',
-      description: description || 'Official Esports Tournament.',
-      createdAt: new Date(),
-    };
-    mockTournaments.set(mockId, mockObj);
-    return res
-      .status(201)
-      .json(new ApiResponse(201, mockObj, 'Tournament created successfully'));
+  const mockId = 'mock-t-' + Date.now();
+  const mockObj = {
+    _id: mockId,
+    title,
+    game,
+    mode: mode || 'SQUAD',
+    entryFee: Number(entryFee) || 0,
+    prizePool,
+    winnerCount: parsedWinnerCount,
+    prizeBreakdown: parsedBreakdown,
+    slots: Number(slots),
+    filledSlots: 0,
+    date,
+    time,
+    map: map || 'TBD',
+    status: 'UPCOMING',
+    registrationOpen: true,
+    roomID: '',
+    password: '',
+    bannerImage: bannerImage || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=80',
+    description: description || 'Official Esports Tournament.',
+    createdAt: new Date(),
+  };
+
+  // 1. Write to persistent JSON store
+  mockTournaments.set(mockId, mockObj);
+
+  // 2. Write to MongoDB if connected
+  if (mongoose.connection.readyState === 1) {
+    try {
+      const tournamentData = {
+        title,
+        game,
+        mode: mode || 'SQUAD',
+        entryFee: Number(entryFee) || 0,
+        prizePool,
+        winnerCount: parsedWinnerCount,
+        prizeBreakdown: parsedBreakdown,
+        slots: Number(slots),
+        filledSlots: 0,
+        date,
+        time,
+        map: map || 'TBD',
+        bannerImage: bannerImage || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=80',
+        description: description || 'Official Esports Tournament.',
+      };
+      if (createdByVal) tournamentData.createdBy = createdByVal;
+
+      const tournament = await Tournament.create(tournamentData);
+      const tournObj = tournament.toObject ? tournament.toObject() : tournament;
+      mockTournaments.set(String(tournObj._id), tournObj);
+
+      return res
+        .status(201)
+        .json(new ApiResponse(201, tournObj, 'Tournament created successfully'));
+    } catch (dbError) {
+      console.warn('[Tournament DB Save Warning]', dbError.message);
+    }
   }
 
-  try {
-    const tournament = await Tournament.create({
-      title,
-      game,
-      mode: mode || 'SQUAD',
-      entryFee: entryFee || 0,
-      prizePool,
-      winnerCount: parsedWinnerCount,
-      prizeBreakdown: parsedBreakdown,
-      slots: Number(slots),
-      filledSlots: 0,
-      date,
-      time,
-      map: map || 'TBD',
-      bannerImage: bannerImage || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=80',
-      description: description || 'Official Esports Tournament.',
-      createdBy: req.user?._id,
-    });
-
-    return res
-      .status(201)
-      .json(new ApiResponse(201, tournament, 'Tournament created successfully'));
-  } catch (error) {
-    if (error instanceof ApiError) throw error;
-    // Fallback for dev mode
-    const mockId = 'mock-t-' + Date.now();
-    const mockObj = {
-      _id: mockId,
-      title,
-      game,
-      mode: mode || 'SQUAD',
-      entryFee: Number(entryFee) || 0,
-      prizePool,
-      winnerCount: parsedWinnerCount,
-      prizeBreakdown: parsedBreakdown,
-      slots: Number(slots),
-      filledSlots: 0,
-      date,
-      time,
-      map: map || 'TBD',
-      status: 'UPCOMING',
-      registrationOpen: true,
-      roomID: '',
-      password: '',
-      bannerImage: bannerImage || 'https://images.unsplash.com/photo-1542751371-adc38448a05e?w=800&auto=format&fit=crop&q=80',
-      description: description || 'Official Esports Tournament.',
-      createdAt: new Date(),
-    };
-    mockTournaments.set(mockId, mockObj);
-    return res
-      .status(201)
-      .json(new ApiResponse(201, mockObj, 'Tournament created successfully'));
-  }
+  return res
+    .status(201)
+    .json(new ApiResponse(201, mockObj, 'Tournament created successfully'));
 });
 
 /**
@@ -147,9 +128,10 @@ const createTournament = asyncHandler(async (req, res) => {
 const getAllTournaments = asyncHandler(async (req, res) => {
   const { status, game, search } = req.query;
 
+  const { createPersistentStore } = require('../utils/persistentStore');
+  const freshMockRegs = createPersistentStore('registrations', []);
+
   if (mongoose.connection.readyState !== 1) {
-    const { createPersistentStore } = require('../utils/persistentStore');
-    const freshMockRegs = createPersistentStore('registrations', []);
     let list = getFilteredMockList(status, game, search);
 
     list = list.map((t) => {
@@ -182,7 +164,7 @@ const getAllTournaments = asyncHandler(async (req, res) => {
     const Registration = require('../models/registrationModel');
     const tournaments = await Tournament.find(query).sort({ createdAt: -1 });
 
-    const populatedList = await Promise.all(
+    const dbList = await Promise.all(
       tournaments.map(async (t) => {
         const count = await Registration.countDocuments({ tournament: t._id, status: { $ne: 'CANCELLED' } });
         const obj = t.toObject ? t.toObject() : t;
@@ -191,12 +173,17 @@ const getAllTournaments = asyncHandler(async (req, res) => {
       })
     );
 
+    // Merge mock store items if DB is empty or missing mock items
+    let mockList = getFilteredMockList(status, game, search);
+    const dbIds = new Set(dbList.map((d) => String(d._id)));
+    const mergedMock = mockList.filter((m) => !dbIds.has(String(m._id)));
+
+    const finalList = [...dbList, ...mergedMock];
+
     return res
       .status(200)
-      .json(new ApiResponse(200, populatedList, 'Tournaments retrieved successfully'));
+      .json(new ApiResponse(200, finalList, 'Tournaments retrieved successfully'));
   } catch (error) {
-    const { createPersistentStore } = require('../utils/persistentStore');
-    const freshMockRegs = createPersistentStore('registrations', []);
     let list = getFilteredMockList(status, game, search);
 
     list = list.map((t) => {
@@ -366,8 +353,14 @@ const updateTournamentStatus = asyncHandler(async (req, res) => {
   if (mongoose.connection.readyState !== 1) {
     const mockObj = mockTournaments.get(id);
     if (mockObj) {
-      if (status) mockObj.status = status;
+      if (status) {
+        mockObj.status = status;
+        if (status === 'COMPLETED' && !mockObj.completedAt) {
+          mockObj.completedAt = new Date();
+        }
+      }
       if (registrationOpen !== undefined) mockObj.registrationOpen = registrationOpen;
+      mockTournaments.set(id, mockObj);
       return res
         .status(200)
         .json(new ApiResponse(200, mockObj, 'Tournament status updated'));
@@ -392,8 +385,14 @@ const updateTournamentStatus = asyncHandler(async (req, res) => {
     if (error instanceof ApiError) throw error;
     const mockObj = mockTournaments.get(id);
     if (mockObj) {
-      if (status) mockObj.status = status;
+      if (status) {
+        mockObj.status = status;
+        if (status === 'COMPLETED' && !mockObj.completedAt) {
+          mockObj.completedAt = new Date();
+        }
+      }
       if (registrationOpen !== undefined) mockObj.registrationOpen = registrationOpen;
+      mockTournaments.set(id, mockObj);
       return res
         .status(200)
         .json(new ApiResponse(200, mockObj, 'Tournament status updated'));

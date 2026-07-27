@@ -22,9 +22,12 @@ import {
   Calendar,
   Sparkles,
   Zap,
+  Phone,
+  X,
 } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
+import PacmanLoader from '@/components/PacmanLoader';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { io } from 'socket.io-client';
@@ -85,15 +88,33 @@ export default function DashboardPage() {
   });
 
   // Profile Edit State
+  const [name, setName] = useState(user?.name || '');
+  const [phone, setPhone] = useState(user?.phone || '');
   const [gameName, setGameName] = useState(user?.gameName || '');
   const [gameUID, setGameUID] = useState(user?.gameUID || '');
+  const [preferredGame, setPreferredGame] = useState(user?.preferredGame || 'Free Fire');
+  const [preferredRole, setPreferredRole] = useState(user?.preferredRole || 'Assaulter');
   const [profileImage, setProfileImage] = useState<File | null>(null);
-  const [idProof, setIdProof] = useState<File | null>(null);
+  const [avatarPreview, setAvatarPreview] = useState<string>(user?.profileImage || '');
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [savingProfile, setSavingProfile] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [profileSuccess, setProfileSuccess] = useState('');
   const [profileError, setProfileError] = useState('');
   const avatarInputRef = React.useRef<HTMLInputElement>(null);
+  const modalAvatarInputRef = React.useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (user) {
+      setName(user.name || '');
+      setPhone(user.phone || '');
+      setGameName(user.gameName || '');
+      setGameUID(user.gameUID || '');
+      setPreferredGame(user.preferredGame || 'Free Fire');
+      setPreferredRole(user.preferredRole || 'Assaulter');
+      setAvatarPreview(user.profileImage || '');
+    }
+  }, [user]);
 
   const handleDirectAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -187,10 +208,16 @@ export default function DashboardPage() {
     setProfileError('');
 
     const formData = new FormData();
+    formData.append('name', name);
+    formData.append('phone', phone);
     formData.append('gameName', gameName);
     formData.append('gameUID', gameUID);
-    if (profileImage) formData.append('profileImage', profileImage);
-    if (idProof) formData.append('idProof', idProof);
+    formData.append('preferredGame', preferredGame);
+    formData.append('preferredRole', preferredRole);
+    if (profileImage) {
+      formData.append('profileImage', profileImage);
+      formData.append('avatar', profileImage);
+    }
 
     try {
       const res = await api.put('/auth/update-profile', formData, {
@@ -198,7 +225,20 @@ export default function DashboardPage() {
       });
       setProfileSuccess('Profile updated successfully!');
       const updatedUser = res.data.data;
-      updateUser(updatedUser);
+      if (updatedUser) {
+        updateUser(updatedUser);
+      } else {
+        updateUser({
+          name,
+          phone,
+          gameName,
+          gameUID,
+          preferredGame,
+          preferredRole,
+          profileImage: avatarPreview,
+        });
+      }
+      setIsEditModalOpen(false);
       fetchGamingStats(activeGameFilter);
     } catch (err: any) {
       setProfileError(err.response?.data?.message || 'Failed to update profile');
@@ -265,27 +305,56 @@ export default function DashboardPage() {
                   <h1 className="text-3xl md:text-4xl font-heading font-extrabold uppercase tracking-tight text-white">{user.name}</h1>
                   <p className="text-xs font-mono text-[#F7931A] font-bold uppercase tracking-wider mt-1">{user.email} • ROLE: {user.role}</p>
                 </div>
-                <span className="px-4 py-1.5 text-xs font-mono font-bold uppercase bg-[#F7931A]/15 text-[#F7931A] border border-[#F7931A]/40 rounded-full w-fit mx-auto md:mx-0 shadow-[0_0_15px_-3px_rgba(247,147,26,0.3)]">
-                  VERIFIED DEFI PLAYER
-                </span>
+                <div className="flex flex-wrap items-center gap-3 justify-center md:justify-end">
+                  <span className="px-4 py-1.5 text-xs font-mono font-bold uppercase bg-[#F7931A]/15 text-[#F7931A] border border-[#F7931A]/40 rounded-full shadow-[0_0_15px_-3px_rgba(247,147,26,0.3)]">
+                    VERIFIED DEFI PLAYER
+                  </span>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setName(user.name || '');
+                      setPhone(user.phone || '');
+                      setGameName(user.gameName || '');
+                      setGameUID(user.gameUID || '');
+                      setPreferredGame(user.preferredGame || 'Free Fire');
+                      setPreferredRole(user.preferredRole || 'Assaulter');
+                      setAvatarPreview(user.profileImage || '');
+                      setProfileSuccess('');
+                      setProfileError('');
+                      setIsEditModalOpen(true);
+                    }}
+                    className="px-4 py-1.5 text-xs font-bold uppercase bg-[#DFE104] text-black rounded-full hover:bg-white transition-all flex items-center gap-1.5 shadow-lg shadow-[#DFE104]/20 cursor-pointer"
+                  >
+                    <Edit3 className="h-3.5 w-3.5 stroke-[2.5]" />
+                    <span>EDIT PROFILE</span>
+                  </button>
+                </div>
               </div>
 
-              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-white/10 text-xs font-mono font-bold uppercase">
+              <div className="grid grid-cols-2 sm:grid-cols-6 gap-3 pt-4 border-t border-white/10 text-xs font-mono font-bold uppercase">
+                <div className="bg-white/5 p-3 rounded-2xl border border-white/5">
+                  <span className="text-[#94A3B8] block text-[10px]">PRIMARY GAME</span>
+                  <span className="text-[#DFE104] text-xs font-extrabold block truncate">{user.preferredGame || 'FREE FIRE'}</span>
+                </div>
+                <div className="bg-white/5 p-3 rounded-2xl border border-white/5">
+                  <span className="text-[#94A3B8] block text-[10px]">PRIMARY ROLE</span>
+                  <span className="text-white text-xs font-extrabold block truncate">{user.preferredRole || 'ASSAULTER'}</span>
+                </div>
                 <div className="bg-white/5 p-3 rounded-2xl border border-white/5">
                   <span className="text-[#94A3B8] block text-[10px]">GAME HANDLE</span>
-                  <span className="text-white text-sm">{user.gameName || 'NOT SET'}</span>
+                  <span className="text-white text-xs block truncate">{user.gameName || 'NOT SET'}</span>
                 </div>
                 <div className="bg-white/5 p-3 rounded-2xl border border-white/5">
                   <span className="text-[#94A3B8] block text-[10px]">CHARACTER UID</span>
-                  <span className="text-white text-sm">{user.gameUID || 'NOT SET'}</span>
+                  <span className="text-white text-xs block truncate">{user.gameUID || 'NOT SET'}</span>
                 </div>
                 <div className="bg-white/5 p-3 rounded-2xl border border-white/5">
                   <span className="text-[#94A3B8] block text-[10px]">TOTAL MATCHES</span>
-                  <span className="text-[#F7931A] text-sm">{stats.totalMatchesPlayed}</span>
+                  <span className="text-[#F7931A] text-xs font-extrabold block">{stats.totalMatchesPlayed}</span>
                 </div>
                 <div className="bg-white/5 p-3 rounded-2xl border border-white/5">
                   <span className="text-[#94A3B8] block text-[10px]">CAREER EARNINGS</span>
-                  <span className="text-emerald-400 text-sm">₹{stats.totalPrize.toLocaleString()}</span>
+                  <span className="text-emerald-400 text-xs font-extrabold block">₹{stats.totalPrize.toLocaleString()}</span>
                 </div>
               </div>
             </div>
@@ -322,9 +391,8 @@ export default function DashboardPage() {
           </div>
 
           {statsLoading ? (
-            <div className="flex flex-col items-center justify-center py-12 text-[#DFE104]">
-              <Loader2 className="h-8 w-8 animate-spin mb-3 stroke-[2]" />
-              <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">SYNCING PLAYER METRICS...</span>
+            <div className="py-8">
+              <PacmanLoader text="SYNCING PLAYER METRICS..." />
             </div>
           ) : (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
@@ -586,7 +654,7 @@ export default function DashboardPage() {
         <section className="bg-[#0D1117]/80 border border-white/10 rounded-3xl p-8 shadow-xl">
           <h2 className="text-2xl font-display font-bold uppercase tracking-tight text-[#FAFAFA] mb-6 flex items-center gap-2">
             <Edit3 className="h-5 w-5 text-[#DFE104] stroke-[2]" />
-            <span>PLAYER IDENTIFICATION & PROOF UPDATES</span>
+            <span>PLAYER IDENTIFICATION & PROFILE UPDATES</span>
           </h2>
 
           {profileSuccess && (
@@ -606,29 +674,85 @@ export default function DashboardPage() {
           <form onSubmit={handleProfileUpdate} className="space-y-6">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#94A3B8] mb-2">FULL NAME</label>
+                <div className="relative">
+                  <User className="h-4 w-4 absolute left-3.5 top-3.5 text-[#94A3B8]" />
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="ENTER YOUR FULL NAME"
+                    className="w-full bg-white/5 border border-white/15 rounded-xl py-3 pl-10 pr-4 text-sm text-[#FAFAFA] focus:outline-none focus:border-[#DFE104] font-bold uppercase"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#94A3B8] mb-2">PHONE NUMBER</label>
+                <div className="relative">
+                  <Phone className="h-4 w-4 absolute left-3.5 top-3.5 text-[#94A3B8]" />
+                  <input
+                    type="text"
+                    required
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="ENTER YOUR PHONE NUMBER"
+                    className="w-full bg-white/5 border border-white/15 rounded-xl py-3 pl-10 pr-4 text-sm text-[#FAFAFA] focus:outline-none focus:border-[#DFE104] font-bold uppercase"
+                  />
+                </div>
+              </div>
+
+              <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-[#94A3B8] mb-2">IN-GAME NAME / HANDLE</label>
-                <input
-                  type="text"
-                  value={gameName}
-                  onChange={(e) => setGameName(e.target.value)}
-                  placeholder="E.G. PROGAMER#TAG1"
-                  className="w-full bg-white/5 border border-white/15 rounded-xl py-3 px-4 text-sm text-[#FAFAFA] focus:outline-none focus:border-[#DFE104] font-bold uppercase"
-                />
+                <div className="relative">
+                  <Gamepad2 className="h-4 w-4 absolute left-3.5 top-3.5 text-[#94A3B8]" />
+                  <input
+                    type="text"
+                    value={gameName}
+                    onChange={(e) => setGameName(e.target.value)}
+                    placeholder="E.G. PROGAMER#TAG1"
+                    className="w-full bg-white/5 border border-white/15 rounded-xl py-3 pl-10 pr-4 text-sm text-[#FAFAFA] focus:outline-none focus:border-[#DFE104] font-bold uppercase"
+                  />
+                </div>
               </div>
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-[#94A3B8] mb-2">IN-GAME CHARACTER UID</label>
-                <input
-                  type="text"
-                  value={gameUID}
-                  onChange={(e) => setGameUID(e.target.value)}
-                  placeholder="E.G. 519284019"
-                  className="w-full bg-white/5 border border-white/15 rounded-xl py-3 px-4 text-sm text-[#FAFAFA] focus:outline-none focus:border-[#DFE104] font-bold uppercase"
-                />
+                <div className="relative">
+                  <Gamepad2 className="h-4 w-4 absolute left-3.5 top-3.5 text-[#94A3B8]" />
+                  <input
+                    type="text"
+                    value={gameUID}
+                    onChange={(e) => setGameUID(e.target.value)}
+                    placeholder="E.G. 519284019"
+                    className="w-full bg-white/5 border border-white/15 rounded-xl py-3 pl-10 pr-4 text-sm text-[#FAFAFA] focus:outline-none focus:border-[#DFE104] font-bold uppercase"
+                  />
+                </div>
               </div>
             </div>
 
-
+            {/* Profile Avatar Upload Field */}
+            <div className="p-4 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-between">
+              <div className="flex items-center space-x-4">
+                <img
+                  src={avatarPreview || user.profileImage || 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150&auto=format&fit=crop&q=80'}
+                  alt="Profile Avatar"
+                  className="h-14 w-14 rounded-full object-cover border-2 border-[#DFE104]"
+                />
+                <div>
+                  <span className="text-xs font-bold text-white uppercase block">PROFILE AVATAR PHOTO</span>
+                  <span className="text-[10px] text-[#94A3B8] block">Upload custom avatar photo</span>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => avatarInputRef.current?.click()}
+                className="px-4 py-2 bg-white/10 hover:bg-[#DFE104] hover:text-black rounded-xl text-xs font-bold uppercase text-white transition-all border border-white/10"
+              >
+                CHOOSE FILE
+              </button>
+            </div>
 
             <button
               type="submit"
@@ -644,6 +768,213 @@ export default function DashboardPage() {
           </form>
         </section>
       </main>
+
+      {/* Edit Profile Modal */}
+      {isEditModalOpen && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-[#0D1117] border border-white/15 rounded-3xl w-full max-w-lg p-8 relative text-[#FAFAFA] shadow-2xl space-y-6">
+            <button
+              type="button"
+              onClick={() => setIsEditModalOpen(false)}
+              className="absolute top-5 right-5 p-2 rounded-xl bg-white/5 border border-white/10 text-[#FAFAFA] hover:bg-[#DFE104] hover:text-black transition-colors"
+            >
+              <X className="h-5 w-5 stroke-[2]" />
+            </button>
+
+            <div className="flex items-center space-x-3 border-b border-white/10 pb-4">
+              <div className="h-10 w-10 bg-[#DFE104] text-black rounded-2xl flex items-center justify-center font-bold shadow-md shadow-[#DFE104]/20">
+                <User className="h-5 w-5 stroke-[2]" />
+              </div>
+              <div>
+                <h3 className="text-xl font-display font-bold uppercase tracking-tight text-[#FAFAFA]">EDIT PLAYER PROFILE</h3>
+                <p className="text-xs text-[#94A3B8] font-medium">Update your name, phone, handle & character UID</p>
+              </div>
+            </div>
+
+            {profileSuccess && (
+              <div className="p-3 rounded-2xl border border-[#DFE104]/40 bg-[#DFE104]/10 text-[#DFE104] text-xs font-bold uppercase tracking-wide flex items-center gap-2">
+                <CheckCircle className="h-4 w-4 shrink-0 stroke-[2]" />
+                <span>{profileSuccess}</span>
+              </div>
+            )}
+
+            {profileError && (
+              <div className="p-3 rounded-2xl border border-red-500/40 bg-red-500/10 text-red-400 text-xs font-bold uppercase tracking-wide flex items-center gap-2">
+                <AlertCircle className="h-4 w-4 shrink-0 stroke-[2]" />
+                <span>{profileError}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleProfileUpdate} className="space-y-4">
+              {/* Avatar Photo Preview & Change */}
+              <div className="flex items-center space-x-4 p-4 rounded-2xl bg-white/5 border border-white/10">
+                <div className="relative group cursor-pointer" onClick={() => modalAvatarInputRef.current?.click()}>
+                  <img
+                    src={avatarPreview || user.profileImage || 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150&auto=format&fit=crop&q=80'}
+                    alt="Preview"
+                    className="h-16 w-16 rounded-full object-cover border-2 border-[#DFE104]"
+                  />
+                  <div className="absolute inset-0 rounded-full bg-black/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                    <Camera className="h-5 w-5 text-[#DFE104]" />
+                  </div>
+                </div>
+                <div>
+                  <button
+                    type="button"
+                    onClick={() => modalAvatarInputRef.current?.click()}
+                    className="px-3 py-1.5 bg-white/10 hover:bg-[#DFE104] hover:text-black rounded-lg text-xs font-bold uppercase text-white transition-all border border-white/10"
+                  >
+                    CHANGE PHOTO
+                  </button>
+                  <span className="text-[10px] text-[#94A3B8] block mt-1">Upload profile avatar photo</span>
+                </div>
+                <input
+                  ref={modalAvatarInputRef}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      setProfileImage(file);
+                      setAvatarPreview(URL.createObjectURL(file));
+                    }
+                  }}
+                  className="hidden"
+                />
+              </div>
+
+              {/* Name */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#94A3B8] mb-1">FULL NAME</label>
+                <div className="relative">
+                  <User className="h-4 w-4 absolute left-3.5 top-3.5 text-[#94A3B8]" />
+                  <input
+                    type="text"
+                    required
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="w-full bg-white/5 border border-white/15 rounded-xl py-2.5 pl-10 pr-4 text-xs font-bold text-white focus:outline-none focus:border-[#DFE104]"
+                  />
+                </div>
+              </div>
+
+              {/* Phone */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#94A3B8] mb-1">PHONE NUMBER</label>
+                <div className="relative">
+                  <Phone className="h-4 w-4 absolute left-3.5 top-3.5 text-[#94A3B8]" />
+                  <input
+                    type="text"
+                    required
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    className="w-full bg-white/5 border border-white/15 rounded-xl py-2.5 pl-10 pr-4 text-xs font-bold text-white focus:outline-none focus:border-[#DFE104]"
+                  />
+                </div>
+              </div>
+
+              {/* In-Game Name / Handle */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#94A3B8] mb-1">IN-GAME HANDLE / NAME</label>
+                <div className="relative">
+                  <Gamepad2 className="h-4 w-4 absolute left-3.5 top-3.5 text-[#94A3B8]" />
+                  <input
+                    type="text"
+                    value={gameName}
+                    onChange={(e) => setGameName(e.target.value)}
+                    placeholder="E.G. PROGAMER#TAG1"
+                    className="w-full bg-white/5 border border-white/15 rounded-xl py-2.5 pl-10 pr-4 text-xs font-bold text-white uppercase focus:outline-none focus:border-[#DFE104]"
+                  />
+                </div>
+              </div>
+
+              {/* Character UID */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#94A3B8] mb-1">CHARACTER UID</label>
+                <div className="relative">
+                  <Gamepad2 className="h-4 w-4 absolute left-3.5 top-3.5 text-[#94A3B8]" />
+                  <input
+                    type="text"
+                    value={gameUID}
+                    onChange={(e) => setGameUID(e.target.value)}
+                    placeholder="E.G. 519284019"
+                    className="w-full bg-white/5 border border-white/15 rounded-xl py-2.5 pl-10 pr-4 text-xs font-bold text-white uppercase focus:outline-none focus:border-[#DFE104]"
+                  />
+                </div>
+              </div>
+
+              {/* Primary Game */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#94A3B8] mb-1">
+                  PRIMARY GAME / ESPORTS TITLE
+                </label>
+                <div className="relative">
+                  <Gamepad2 className="h-4 w-4 absolute left-3.5 top-3.5 text-[#94A3B8] z-10" />
+                  <select
+                    value={preferredGame}
+                    onChange={(e) => setPreferredGame(e.target.value)}
+                    className="w-full bg-[#0D1117] border border-white/15 rounded-xl py-2.5 pl-10 pr-4 text-xs font-bold text-white uppercase focus:outline-none focus:border-[#DFE104] cursor-pointer"
+                  >
+                    <option value="Free Fire" className="bg-[#0D1117]">FREE FIRE</option>
+                    <option value="BGMI" className="bg-[#0D1117]">BGMI</option>
+                    <option value="Valorant" className="bg-[#0D1117]">VALORANT</option>
+                    <option value="Call of Duty" className="bg-[#0D1117]">CALL OF DUTY</option>
+                    <option value="PUBG" className="bg-[#0D1117]">PUBG</option>
+                    <option value="Clash Royale" className="bg-[#0D1117]">CLASH ROYALE</option>
+                    <option value="CS:GO" className="bg-[#0D1117]">CS:GO</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Primary Role */}
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-[#94A3B8] mb-1">
+                  PRIMARY GAMING ROLE
+                </label>
+                <div className="relative">
+                  <User className="h-4 w-4 absolute left-3.5 top-3.5 text-[#94A3B8] z-10" />
+                  <select
+                    value={preferredRole}
+                    onChange={(e) => setPreferredRole(e.target.value)}
+                    className="w-full bg-[#0D1117] border border-white/15 rounded-xl py-2.5 pl-10 pr-4 text-xs font-bold text-white uppercase focus:outline-none focus:border-[#DFE104] cursor-pointer"
+                  >
+                    <option value="Assaulter" className="bg-[#0D1117]">ASSAULTER</option>
+                    <option value="Sniper" className="bg-[#0D1117]">SNIPER</option>
+                    <option value="IGL" className="bg-[#0D1117]">IGL (LEADER)</option>
+                    <option value="Support" className="bg-[#0D1117]">SUPPORT</option>
+                    <option value="Rusher" className="bg-[#0D1117]">RUSHER</option>
+                    <option value="Entry Fragger" className="bg-[#0D1117]">ENTRY FRAGGER</option>
+                    <option value="Anchor" className="bg-[#0D1117]">ANCHOR</option>
+                    <option value="Scout" className="bg-[#0D1117]">SCOUT</option>
+                    <option value="Flex" className="bg-[#0D1117]">FLEX</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-end space-x-3 pt-4 border-t border-white/10">
+                <button
+                  type="button"
+                  onClick={() => setIsEditModalOpen(false)}
+                  className="px-4 py-2 rounded-xl border border-white/10 text-xs font-bold uppercase hover:bg-white/5"
+                >
+                  CANCEL
+                </button>
+                <button
+                  type="submit"
+                  disabled={savingProfile}
+                  className="kt-btn-primary text-xs flex items-center justify-center gap-2 disabled:opacity-50"
+                >
+                  {savingProfile ? (
+                    <Loader2 className="h-4 w-4 animate-spin stroke-[2]" />
+                  ) : (
+                    <span>SAVE CHANGES</span>
+                  )}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

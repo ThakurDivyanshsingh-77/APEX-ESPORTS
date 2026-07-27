@@ -11,6 +11,7 @@ import { Trophy, Calendar, Clock, MapPin, Users, DollarSign, Shield, ArrowLeft, 
 import { Tournament } from '../page';
 import api from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
+import PacmanLoader from '@/components/PacmanLoader';
 
 export default function TournamentDetailPage() {
   const params = useParams();
@@ -122,11 +123,7 @@ export default function TournamentDetailPage() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen bg-[#090D16] flex items-center justify-center text-[#FAFAFA] text-xs font-bold uppercase tracking-wider">
-        <Loader2 className="h-8 w-8 animate-spin text-[#DFE104] stroke-[2]" />
-      </div>
-    );
+    return <PacmanLoader fullScreen text="LOADING TOURNAMENT DETAILS..." />;
   }
 
   if (error || !tournament) {
@@ -148,6 +145,64 @@ export default function TournamentDetailPage() {
   const isCompleted = tournament.status === 'COMPLETED';
   const isFull = tournament.filledSlots >= tournament.slots;
   const isClosed = !tournament.registrationOpen || tournament.status !== 'UPCOMING';
+
+  const getPrizeBreakdownList = () => {
+    if (!tournament) return [];
+
+    const breakdown = (tournament as any).prizeBreakdown || { first: 0, second: 0, third: 0 };
+    
+    // Determine winner count: priority to explicit winnerCount ('1', '2', '3')
+    let count = String((tournament as any).winnerCount || '3');
+    if (!['1', '2', '3'].includes(count)) {
+      if (breakdown.third && breakdown.third > 0) count = '3';
+      else if (breakdown.second && breakdown.second > 0) count = '2';
+      else count = '1';
+    }
+
+    const rawPrizeStr = String(tournament.prizePool || '');
+    const cleanRawPrize = rawPrizeStr.startsWith('$') ? `₹${rawPrizeStr.slice(1)}` : rawPrizeStr;
+    const currencySymbol = '₹';
+    const digitsOnly = rawPrizeStr.replace(/[^0-9]/g, '');
+    const totalNumeric = parseInt(digitsOnly, 10) || 0;
+
+    let f = breakdown.first || 0;
+    let s = breakdown.second || 0;
+    let t = breakdown.third || 0;
+
+    // Fallback split calculation if individual prize numbers were 0
+    if (f === 0 && s === 0 && t === 0 && totalNumeric > 0) {
+      if (count === '1') {
+        f = totalNumeric;
+      } else if (count === '2') {
+        f = Math.round(totalNumeric * 0.65);
+        s = Math.round(totalNumeric * 0.35);
+      } else {
+        f = Math.round(totalNumeric * 0.50);
+        s = Math.round(totalNumeric * 0.30);
+        t = Math.round(totalNumeric * 0.20);
+      }
+    }
+
+    const result = [];
+
+    // Always 1st Prize for count >= 1
+    const fStr = f > 0 ? `₹${f.toLocaleString()}` : (cleanRawPrize.startsWith('₹') ? cleanRawPrize : `₹${cleanRawPrize}`) || '₹0';
+    result.push({ label: '1ST PRIZE', icon: '🥇', amount: fStr, color: 'text-amber-400' });
+
+    // 2nd Prize if count is '2' or '3'
+    if (count === '2' || count === '3') {
+      const sStr = s > 0 ? `${currencySymbol}${s.toLocaleString()}` : `${currencySymbol}0`;
+      result.push({ label: '2ND PRIZE', icon: '🥈', amount: sStr, color: 'text-slate-300' });
+    }
+
+    // 3rd Prize ONLY if count is '3'
+    if (count === '3') {
+      const tStr = t > 0 ? `${currencySymbol}${t.toLocaleString()}` : `${currencySymbol}0`;
+      result.push({ label: '3RD PRIZE', icon: '🥉', amount: tStr, color: 'text-amber-600' });
+    }
+
+    return result;
+  };
 
   return (
     <div className="min-h-screen bg-[#090D16] text-[#FAFAFA] pb-20 selection:bg-[#DFE104] selection:text-black">
@@ -367,7 +422,7 @@ export default function TournamentDetailPage() {
                           </div>
 
                           <div className="px-5 py-2.5 rounded-xl bg-[#DFE104] text-black font-extrabold text-sm uppercase tracking-wider shadow-md">
-                            ${winner.prizeAmount || 0} CASH
+                            ₹{winner.prizeAmount || 0} CASH
                           </div>
                         </div>
                       </div>
@@ -478,7 +533,14 @@ export default function TournamentDetailPage() {
 
 
             {/* Live Tournament Chatbox */}
-            <LiveChat tournamentId={tournament._id} tournamentTitle={tournament.title} />
+            <LiveChat
+              tournamentId={tournament._id}
+              tournamentTitle={tournament.title}
+              isRegistered={!!registration && registration.status !== 'CANCELLED'}
+              tournamentStatus={tournament.status}
+              completedAt={(tournament as any).completedAt}
+              updatedAt={(tournament as any).updatedAt}
+            />
           </div>
 
           {/* Right Sidebar Key Specs */}
@@ -497,12 +559,25 @@ export default function TournamentDetailPage() {
                   <span className="font-bold text-[#DFE104] text-base">{tournament.prizePool}</span>
                 </div>
 
+                {/* Winner Prize Pool Breakdown */}
+                {getPrizeBreakdownList().map((prize, idx) => (
+                  <div key={idx} className="flex items-center justify-between border-b border-white/10 pb-2 bg-white/[0.03] px-3 py-1.5 rounded-xl border border-white/5">
+                    <span className="text-[#FAFAFA] flex items-center gap-2 font-bold text-xs">
+                      <span className="text-base">{prize.icon}</span>
+                      <span>{prize.label}</span>
+                    </span>
+                    <span className={`font-extrabold text-sm ${prize.color}`}>
+                      {prize.amount}
+                    </span>
+                  </div>
+                ))}
+
                 <div className="flex items-center justify-between border-b border-white/10 pb-2">
                   <span className="text-[#94A3B8] flex items-center gap-2">
                     <DollarSign className="h-4 w-4 text-[#94A3B8] stroke-[2]" /> ENTRY FEE
                   </span>
                   <span className="font-bold text-[#FAFAFA]">
-                    {tournament.entryFee === 0 ? 'FREE ENTRY' : `$${tournament.entryFee}`}
+                    {tournament.entryFee === 0 ? 'FREE ENTRY' : `₹${tournament.entryFee}`}
                   </span>
                 </div>
 
@@ -604,7 +679,7 @@ export default function TournamentDetailPage() {
                 <div className="flex justify-between">
                   <span className="text-[#94A3B8]">ENTRY FEE:</span>
                   <span className="font-bold text-[#DFE104]">
-                    {tournament.entryFee === 0 ? 'FREE' : `$${tournament.entryFee}`}
+                    {tournament.entryFee === 0 ? 'FREE' : `₹${tournament.entryFee}`}
                   </span>
                 </div>
                 <div className="flex justify-between">

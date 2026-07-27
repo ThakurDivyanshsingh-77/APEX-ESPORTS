@@ -6,6 +6,7 @@ import { Trophy, Award, Flame, Star, ShieldCheck, Loader2, Sparkles, User, Medal
 import api from '@/lib/api';
 import { useAuth } from '@/context/AuthContext';
 import Link from 'next/link';
+import PacmanLoader from '@/components/PacmanLoader';
 
 export interface LeaderboardEntry {
   _id: string;
@@ -114,9 +115,8 @@ export default function LeaderboardPage() {
         )}
 
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 text-[#DFE104]">
-            <Loader2 className="h-10 w-10 animate-spin mb-4 stroke-[2]" />
-            <span className="text-xs font-bold uppercase tracking-wider text-[#94A3B8]">CALCULATING LEADERBOARD STANDINGS...</span>
+          <div className="py-16">
+            <PacmanLoader text="CALCULATING LEADERBOARD STANDINGS..." />
           </div>
         ) : leaderboard.length === 0 ? (
           <div className="bg-[#0D1117]/80 border border-white/10 rounded-3xl p-12 text-center shadow-xl flex flex-col items-center justify-center space-y-4">
@@ -265,7 +265,7 @@ export default function LeaderboardPage() {
                           <td className="p-4 text-center text-[#FAFAFA]">{item.totalWins} WINS</td>
                           <td className="p-4 text-center text-[#FAFAFA]">{item.totalKills} KILLS</td>
                           <td className="p-4 text-right pr-6">
-                            <span className="text-base font-bold text-[#DFE104]">${item.totalEarnings?.toLocaleString()}</span>
+                            <span className="text-base font-bold text-[#DFE104]">₹{item.totalEarnings?.toLocaleString()}</span>
                           </td>
                         </tr>
                       );

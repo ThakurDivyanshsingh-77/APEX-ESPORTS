@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Trophy,
   Swords,
@@ -19,16 +19,63 @@ import { useRouter } from 'next/navigation';
 import Marquee from 'react-fast-marquee';
 import Navbar from '@/components/Navbar';
 import { useAuth } from '@/context/AuthContext';
+import api from '@/lib/api';
 
 export default function Home() {
   const router = useRouter();
   const { user } = useAuth();
+
+  const [topEarners, setTopEarners] = useState<any[]>([]);
+  const [loadingEarners, setLoadingEarners] = useState(true);
 
   useEffect(() => {
     if (user) {
       router.push('/tournaments');
     }
   }, [user, router]);
+
+  useEffect(() => {
+    const fetchTopEarners = async () => {
+      try {
+        const res = await api.get('/leaderboard?category=OVERALL');
+        const data = res.data.data || [];
+        if (Array.isArray(data) && data.length > 0) {
+          const mapped = data.slice(0, 3).map((item: any, idx: number) => ({
+            rank: idx + 1,
+            name: item.gameName || item.user?.gameName || item.user?.name || item.name || `PLAYER_${idx + 1}`,
+            game: item.preferredGame || item.game || 'FREE FIRE',
+            earnings: `₹${Number(item.totalEarnings || item.totalPrize || 0).toLocaleString()}`,
+            wins: Number(item.totalWins || item.wins || 0),
+            avatar: item.profileImage || item.user?.profileImage || 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150&auto=format&fit=crop&q=80',
+            badge: idx === 0 ? '★ CHAMPION' : idx === 1 ? '#2 SILVER' : '#3 BRONZE',
+          }));
+          setTopEarners(mapped);
+          return;
+        }
+
+        const playersRes = await api.get('/community/players?sortBy=prize');
+        const players = playersRes.data.data || [];
+        if (Array.isArray(players) && players.length > 0) {
+          const mapped = players.slice(0, 3).map((item: any, idx: number) => ({
+            rank: idx + 1,
+            name: item.gameName || item.name || `PLAYER_${idx + 1}`,
+            game: item.preferredGame || 'FREE FIRE',
+            earnings: `₹${Number(item.totalPrize || 0).toLocaleString()}`,
+            wins: Number(item.wins || 0),
+            avatar: item.profileImage || 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150&auto=format&fit=crop&q=80',
+            badge: idx === 0 ? '★ CHAMPION' : idx === 1 ? '#2 SILVER' : '#3 BRONZE',
+          }));
+          setTopEarners(mapped);
+        }
+      } catch (err) {
+        console.error('Failed to fetch top earners', err);
+      } finally {
+        setLoadingEarners(false);
+      }
+    };
+
+    fetchTopEarners();
+  }, []);
 
   const featuredTournaments = [
     {
@@ -60,36 +107,6 @@ export default function Home() {
       status: 'LIVE BRACKET',
       tag: '5V5 COMPETITIVE',
       bannerUrl: 'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=800&auto=format&fit=crop&q=80',
-    },
-  ];
-
-  const topEarners = [
-    {
-      rank: 1,
-      name: 'PXS_VIPER',
-      game: 'BGMI SQUAD',
-      earnings: '₹1,85,000',
-      wins: 42,
-      avatar: 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150&auto=format&fit=crop&q=80',
-      badge: '★ CHAMPION',
-    },
-    {
-      rank: 2,
-      name: 'CYBER_SHADOW',
-      game: 'VALORANT PRO',
-      earnings: '₹1,20,000',
-      wins: 34,
-      avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80',
-      badge: '#2 SILVER',
-    },
-    {
-      rank: 3,
-      name: 'NEON_BLADE',
-      game: 'CS2 MASTERS',
-      earnings: '₹95,000',
-      wins: 28,
-      avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80',
-      badge: '#3 BRONZE',
     },
   ];
 
@@ -193,21 +210,22 @@ export default function Home() {
 
         <Marquee speed={50} gradient={false} autoFill>
           <div className="flex items-center space-x-10 text-xs font-heading font-bold uppercase pr-10">
-            <span className="text-white flex items-center gap-2">
-              <span className="h-2 w-2 bg-[#DFE104] animate-pulse" />
-              <strong className="text-[#DFE104]">PXS_VIPER</strong> WON <strong className="text-white">₹15,000</strong> IN BGMI SQUADS
-            </span>
-            <span className="text-[#3F3F46]">|</span>
-            <span className="text-white flex items-center gap-2">
-              <span className="h-2 w-2 bg-[#DFE104] animate-pulse" />
-              <strong className="text-[#DFE104]">CYBER_SHADOW</strong> WON <strong className="text-white">₹10,000</strong> IN VALORANT SHOWMATCH
-            </span>
-            <span className="text-[#3F3F46]">|</span>
-            <span className="text-white flex items-center gap-2">
-              <span className="h-2 w-2 bg-[#DFE104] animate-pulse" />
-              <strong className="text-[#DFE104]">NEON_BLADE</strong> VERIFIED <strong className="text-white">₹5,000 UTR SETTLEMENT</strong>
-            </span>
-            <span className="text-[#3F3F46]">|</span>
+            {topEarners.length > 0 ? (
+              topEarners.map((player: any, idx: number) => (
+                <React.Fragment key={idx}>
+                  <span className="text-white flex items-center gap-2">
+                    <span className="h-2 w-2 bg-[#DFE104] animate-pulse" />
+                    <strong className="text-[#DFE104]">{player.name}</strong> EARNED <strong className="text-white">{player.earnings}</strong> IN {player.game}
+                  </span>
+                  <span className="text-[#3F3F46]">|</span>
+                </React.Fragment>
+              ))
+            ) : (
+              <span className="text-white flex items-center gap-2">
+                <span className="h-2 w-2 bg-[#DFE104] animate-pulse" />
+                <strong className="text-[#DFE104]">LIVE ARENA PAYOUT FEED ACTIVE</strong> • REGISTER PROFILE & CLAIM TOP SPOTS
+              </span>
+            )}
           </div>
         </Marquee>
       </section>
@@ -343,40 +361,50 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {topEarners.map((player) => (
-            <div
-              key={player.name}
-              className={`kt-card p-8 text-center relative overflow-hidden ${
-                player.rank === 1 ? 'border-4 border-[#DFE104] bg-[#27272A]/40' : ''
-              }`}
-            >
-              <span className="text-[8rem] font-heading font-extrabold text-[#27272A] absolute -top-8 -right-4 pointer-events-none">
-                0{player.rank}
-              </span>
+        {loadingEarners ? (
+          <div className="py-16 text-center text-[#DFE104] font-mono text-xs font-bold uppercase tracking-widest animate-pulse">
+            LOADING LIVE CIRCUIT CHAMPIONS...
+          </div>
+        ) : topEarners.length === 0 ? (
+          <div className="p-12 text-center bg-[#27272A]/40 border-2 border-[#3F3F46] text-[#A1A1AA] font-mono text-xs font-bold uppercase">
+            NO RANKED PLAYERS YET. REGISTER YOUR PROFILE & CLAIM THE CHAMPION SPOT!
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {topEarners.map((player) => (
+              <div
+                key={player.name}
+                className={`kt-card p-8 text-center relative overflow-hidden ${
+                  player.rank === 1 ? 'border-4 border-[#DFE104] bg-[#27272A]/40' : ''
+                }`}
+              >
+                <span className="text-[8rem] font-heading font-extrabold text-[#27272A] absolute -top-8 -right-4 pointer-events-none">
+                  0{player.rank}
+                </span>
 
-              <img
-                src={player.avatar}
-                alt={player.name}
-                className="h-24 w-24 object-cover mx-auto my-4 border-2 border-[#DFE104] relative z-10"
-              />
+                <img
+                  src={player.avatar}
+                  alt={player.name}
+                  className="h-24 w-24 object-cover mx-auto my-4 border-2 border-[#DFE104] relative z-10"
+                />
 
-              <h3 className="text-2xl font-heading font-extrabold uppercase text-white mb-1 relative z-10">{player.name}</h3>
-              <span className="text-xs font-mono text-[#DFE104] font-bold block mb-6 relative z-10">{player.game}</span>
+                <h3 className="text-2xl font-heading font-extrabold uppercase text-white mb-1 relative z-10">{player.name}</h3>
+                <span className="text-xs font-mono text-[#DFE104] font-bold block mb-6 relative z-10">{player.game}</span>
 
-              <div className="grid grid-cols-2 gap-2 text-xs font-mono font-bold uppercase bg-[#27272A] p-4 border border-[#3F3F46] relative z-10">
-                <div>
-                  <span className="text-[#A1A1AA] block text-[10px]">TOTAL WINS</span>
-                  <span className="text-white text-base font-heading font-bold">{player.wins} TITLES</span>
-                </div>
-                <div>
-                  <span className="text-[#A1A1AA] block text-[10px]">EARNINGS</span>
-                  <span className="text-[#DFE104] text-base font-heading font-bold">{player.earnings}</span>
+                <div className="grid grid-cols-2 gap-2 text-xs font-mono font-bold uppercase bg-[#27272A] p-4 border border-[#3F3F46] relative z-10">
+                  <div>
+                    <span className="text-[#A1A1AA] block text-[10px]">TOTAL WINS</span>
+                    <span className="text-white text-base font-heading font-bold">{player.wins} TITLES</span>
+                  </div>
+                  <div>
+                    <span className="text-[#A1A1AA] block text-[10px]">EARNINGS</span>
+                    <span className="text-[#DFE104] text-base font-heading font-bold">{player.earnings}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
       </section>
 
       {/* Feature Highlights / Architecture Cards */}

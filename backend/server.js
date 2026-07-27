@@ -24,7 +24,12 @@ app.set('io', io);
 startRoomRevealJob();
 
 // Security & utility middlewares
-app.use(helmet({ crossOriginResourcePolicy: { policy: 'cross-origin' } }));
+app.use(
+  helmet({
+    crossOriginResourcePolicy: { policy: 'cross-origin' },
+    crossOriginOpenerPolicy: { policy: 'same-origin-allow-popups' },
+  })
+);
 app.use(
   cors({
     origin: process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : '*',

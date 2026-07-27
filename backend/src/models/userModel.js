@@ -37,6 +37,16 @@ const userSchema = new mongoose.Schema(
       default: '',
       trim: true,
     },
+    preferredGame: {
+      type: String,
+      default: 'Free Fire',
+      trim: true,
+    },
+    preferredRole: {
+      type: String,
+      default: 'Assaulter',
+      trim: true,
+    },
     role: {
       type: String,
       enum: ['PLAYER', 'ORGANIZER', 'ADMIN'],

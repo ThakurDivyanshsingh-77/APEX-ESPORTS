@@ -20,14 +20,37 @@ const notificationSchema = new mongoose.Schema(
     type: {
       type: String,
       enum: [
+        'TOURNAMENT_CREATED',
+        'TOURNAMENT_UPDATED',
+        'TOURNAMENT_CANCELLED',
+        'MATCH_REMINDER',
+        'ROOM_RELEASED',
+        'PRIZE_CREDITED',
+        'WALLET_UPDATED',
+        'DEPOSIT_APPROVED',
+        'DEPOSIT_REJECTED',
+        'WITHDRAW_APPROVED',
+        'WITHDRAW_REJECTED',
         'PAYMENT_APPROVED',
         'PAYMENT_REJECTED',
-        'ROOM_RELEASED',
-        'TOURNAMENT_STARTING',
+        'FRIEND_REQUEST',
+        'FRIEND_REQUEST_ACCEPTED',
+        'NEW_MESSAGE',
         'SUPPORT_REPLY',
         'ANNOUNCEMENT',
+        'MODERATOR_ANNOUNCEMENT',
+        'ADMIN_ANNOUNCEMENT',
+        'SECURITY_ALERT',
       ],
       default: 'ANNOUNCEMENT',
+    },
+    link: {
+      type: String,
+      default: '/notifications',
+    },
+    metadata: {
+      type: mongoose.Schema.Types.Mixed,
+      default: {},
     },
     read: {
       type: Boolean,
@@ -40,6 +63,7 @@ const notificationSchema = new mongoose.Schema(
 );
 
 notificationSchema.index({ user: 1, read: 1 });
+notificationSchema.index({ createdAt: -1 });
 
 const Notification = mongoose.model('Notification', notificationSchema);
 module.exports = Notification;

@@ -120,7 +120,7 @@ export default function PaymentModal({
             <span className="text-[#DFE104] bg-white/5 border border-white/10 px-3 py-1 rounded-full">esports@upi</span>
           </div>
           <div className="mt-3 px-6 py-2.5 bg-[#DFE104] text-black text-sm font-bold uppercase tracking-wider rounded-xl shadow-md">
-            AMOUNT DUE: ${entryFee} / ₹{entryFee * 80}
+            AMOUNT DUE: ₹{entryFee}
           </div>
         </div>
 
