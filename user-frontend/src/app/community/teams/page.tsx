@@ -260,9 +260,9 @@ export default function TeamsPage() {
                       <div className="flex items-center justify-between">
                         <span className="text-xs font-bold text-white uppercase truncate">{m.userName || 'Roster Member'}</span>
                         {m.role === 'CAPTAIN' ? (
-                          <Crown className="h-4 w-4 text-[#DFE104] shrink-0" title="Team Captain" />
+                          <span title="Team Captain" className="shrink-0"><Crown className="h-4 w-4 text-[#DFE104]" /></span>
                         ) : (
-                          <Shield className="h-4 w-4 text-[#94A3B8] shrink-0" title="Team Member" />
+                          <span title="Team Member" className="shrink-0"><Shield className="h-4 w-4 text-[#94A3B8]" /></span>
                         )}
                       </div>
                       <p className="text-[10px] font-mono text-[#DFE104] font-bold uppercase truncate">
