@@ -4,7 +4,7 @@
   "private": true,
   "description": "Esports Tournament Platform Monorepo Workspace",
   "scripts": {
-    "build": "cd user-frontend && npm run build",
+    "build": "npm --prefix user-frontend run build",
     "dev:backend": "cd backend && npm run dev",
     "dev:user": "cd user-frontend && npm run dev",
     "dev:admin": "cd admin-frontend && npm run dev",
