@@ -588,7 +588,9 @@ interface ILeaderboard {
 - **Tournament Creation Sync Fix** ([tournamentController.js](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/backend/src/controllers/tournamentController.js) & [admin-frontend/tournaments/page.tsx](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/admin-frontend/src/app/tournaments/page.tsx)):
   - Validated `createdBy` Mongoose ObjectId to prevent `CastError` when admins log in with dev tokens (`dev-admin-id`).
   - Merged local file store `mockTournaments` and MongoDB query results in `getAllTournaments` so newly created tournaments appear immediately in admin and user lists.
-  - Initialized default `formData` state in admin tournament modal to pre-populate game, mode, date, and prize pool.
+- **COOP Policy & Connection Fallback Fixes** ([server.js](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/backend/server.js), [user-frontend/src/lib/api.ts](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/user-frontend/src/lib/api.ts), [admin-frontend/src/lib/api.ts](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/admin-frontend/src/lib/api.ts)):
+  - Changed `crossOriginOpenerPolicy` to `{ policy: 'unsafe-none' }` in Helmet to prevent browser COOP popup window warnings during Google OAuth flow.
+  - Added automatic Axios connection retry interceptors in both `user-frontend` and `admin-frontend`. If local backend is down or unreachable (`ERR_CONNECTION_REFUSED`), requests automatically failover to `https://apex-esports.onrender.com/api/v1`.
 
 ### Login Page Left Showcase Section Removal (Completed 2026-07-27)
 - **Login UI Layout Simplification** ([login/page.tsx](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/user-frontend/src/app/login/page.tsx)): Removed the left-side arena showcase hero column, top athlete floating badge, live match lobby badge, and multi-column grid layout. The login authentication card is now cleanly centered on both desktop and mobile viewports with a header logo.

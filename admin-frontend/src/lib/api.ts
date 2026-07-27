@@ -28,4 +28,26 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
+api.interceptors.response.use(
+  (response) => response,
+  async (error) => {
+    const originalRequest = error.config;
+    // If request failed due to connection refused on localhost, fallback retry to Render backend
+    if (
+      error.code === 'ERR_NETWORK' ||
+      error.code === 'ECONNREFUSED' ||
+      !error.response
+    ) {
+      if (originalRequest && !originalRequest._retry && originalRequest.url) {
+        originalRequest._retry = true;
+        const renderBase = 'https://apex-esports.onrender.com/api/v1';
+        originalRequest.baseURL = renderBase;
+        console.warn(`[API Connection Fallback] Local server unreachable. Retrying request to ${renderBase}${originalRequest.url}`);
+        return api(originalRequest);
+      }
+    }
+    return Promise.reject(error);
+  }
+);
+
 export default api;
