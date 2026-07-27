@@ -621,12 +621,13 @@ All 6 critical bugs in the Admin ↔ User data sync pipeline were found and fixe
 
 ### Deployed & Local Endpoints
 - **User Frontend App (Deployed Vercel)**: `https://apex-esports-zlbc.vercel.app`
+- **Admin Frontend App (Deployed Vercel)**: `https://apex-esports-admin.vercel.app`
 - **Render Backend Service (Deployed)**: `https://apex-esports.onrender.com/api/v1`
 - **Local User Frontend App (Dev)**: `http://localhost:3000`
 - **Local Admin Frontend App (Dev)**: `http://localhost:3001`
 - **Local Backend Service (Dev)**: `http://localhost:5000/api/v1`
 
-> Both local execution (`http://localhost:3000`, `http://localhost:5000`) and production deployment (`https://apex-esports-zlbc.vercel.app`, `https://apex-esports.onrender.com`) are fully configured and CORS-whitelisted across `backend`, `user-frontend`, and `admin-frontend`.
+> Both local execution (`http://localhost:3000`, `http://localhost:3001`, `http://localhost:5000`) and production deployment (`https://apex-esports-zlbc.vercel.app`, `https://apex-esports-admin.vercel.app`, `https://apex-esports.onrender.com`) are fully configured and CORS-whitelisted across `backend`, `user-frontend`, and `admin-frontend`.
 
 ### Vercel Deployment Configuration
 - Added **[vercel.json](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/vercel.json)** in root workspace directory:
