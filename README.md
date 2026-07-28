@@ -29,6 +29,11 @@ The platform ships as a **monorepo** with three coordinated apps:
 | 🖥️ **User Frontend** | Player-facing portal — browse tournaments, register, pay, chat, and climb the leaderboard |
 | 🛡️ **Admin Frontend** | Operator console — manage tournaments, verify payments, resolve disputes, publish results |
 | ⚙️ **Backend API** | Node/Express + MongoDB core powering auth, payments, sockets, and push notifications |
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/b387aa47-e278-4130-a500-6b2de3da678d" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/b9325278-b3c1-473e-9aaa-3a0dc419a467" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2f99e9fe-2e13-4870-8dd6-2a88b07ae0ae" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/8e83d48c-0c6c-4786-bc48-2e5baff142e1" />
 
 ---
 
@@ -38,6 +43,10 @@ The platform ships as a **monorepo** with three coordinated apps:
 - Full tournament lifecycle: create → open registration → auto room reveal → declare results → sync leaderboard
 - Configurable **winner count (1/2/3)** with automatic prize pool breakdown
 - Live slot tracking (`filledSlots / totalSlots`) computed from real registrations
+- <img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/26722d8c-181d-47be-b684-ee32aa65108b" />
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/2b214a84-87bd-4ceb-a0bb-d594042d6255" />
+
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/87aa15b8-932e-47b7-9b81-b3f9de186290" />
 
 ### 🔐 Secure Room Credential System
 - Room ID & password stay hidden until **15 minutes before match start**
@@ -53,6 +62,7 @@ The platform ships as a **monorepo** with three coordinated apps:
 - Tabs for `Overall`, `Solo`, `Squad`, `Monthly`, `Weekly`
 - Auto-calculated from published results — wins, kills, points, and prize money (₹)
 - Top-3 podium UI with real-time sync on result publish
+<img width="1920" height="1080" alt="image" src="https://github.com/user-attachments/assets/4dc1c73b-7ef6-4e30-a480-1567e8f8fa46" />
 
 ### 🎮 Social & Community Layer
 - Player directory with search, filters, and win-rate sorting
