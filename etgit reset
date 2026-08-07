@@ -1,0 +1,13 @@
+ PROJECT_CONTEXT.md                             |  23 [32m+[m
+ README.md                                      |   2 [32m+[m[31m-[m
+ admin-frontend/package-lock.json               |  43 [32m++[m
+ admin-frontend/package.json                    |   1 [32m+[m
+ admin-frontend/src/app/page.tsx                |  68 [32m++[m[31m-[m
+ admin-frontend/src/components/AdminSidebar.tsx |  98 [32m++[m[31m--[m
+ admin-frontend/tsconfig.tsbuildinfo            |   2 [32m+[m[31m-[m
+ user-frontend/src/app/leaderboard/page.tsx     | 119 [32m+++[m[31m--[m
+ user-frontend/src/app/page.tsx                 | 191 [32m++++[m[31m---[m
+ user-frontend/src/app/tournaments/page.tsx     |  91 [32m+++[m[31m-[m
+ user-frontend/src/components/Navbar.tsx        | 665 [32m++++++++++++++[m[31m-----------[m
+ user-frontend/src/components/PaymentModal.tsx  | 230 [32m+++++[m[31m----[m
+ 12 files changed, 957 insertions(+), 576 deletions(-)
