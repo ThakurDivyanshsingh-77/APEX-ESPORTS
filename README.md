@@ -7,7 +7,7 @@ Full-stack esports tournament management platform featuring real-time socket upd
 - **`backend/`**: Node.js + Express + MongoDB + Socket.io + JWT API Server
 - **`user-frontend/`**: Next.js (App Router) + Tailwind CSS + Framer Motion Esports Portal
 - **`admin-frontend/`**: Next.js (App Router) + TanStack Table + Chart.js Admin Dashboard
-
+Testing CommitPilot AI Phase 3
 ## Quick Start
 
 ### 1. Install Dependencies

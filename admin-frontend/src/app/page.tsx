@@ -2,6 +2,7 @@
 
 import React, { useMemo, useState, useEffect } from 'react';
 import AdminSidebar from '@/components/AdminSidebar';
+import { motion } from 'framer-motion';
 import {
   Trophy,
   Users,
@@ -73,6 +74,21 @@ interface DashboardStats {
     tournaments: number[];
   };
 }
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.1,
+    },
+  },
+};
 
 export default function AdminDashboard() {
   const [stats, setStats] = useState<DashboardStats | null>(null);
@@ -207,16 +223,26 @@ export default function AdminDashboard() {
       {/* Main Content */}
       <main className="flex-1 p-6 sm:p-8 w-full overflow-y-auto">
         {/* Top Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 border-b-2 border-[#3F3F46] pb-6">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8 border-b-2 border-[#3F3F46] pb-6"
+        >
           <div>
             <h2 className="text-4xl font-heading font-extrabold uppercase text-white tracking-tighter">PLATFORM ANALYTICS & KINETIC ENGINE</h2>
             <p className="text-xs font-mono text-[#A1A1AA] uppercase tracking-wider mt-1">Real-time metrics, active tournaments, and platform prize settlements.</p>
           </div>
-        </div>
+        </motion.div>
 
         {/* Stats Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-          <div className="kt-card p-6">
+        <motion.div 
+          initial="hidden"
+          animate="visible"
+          variants={staggerContainer}
+          className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8"
+        >
+          <motion.div variants={fadeInUp} whileHover={{ y: -4 }} className="kt-card p-6">
             <div className="flex items-center justify-between text-[#A1A1AA] mb-2 font-mono text-xs uppercase font-bold">
               <span>Total Registered Users</span>
               <Users className="h-5 w-5 text-[#DFE104]" />
@@ -227,9 +253,9 @@ export default function AdminDashboard() {
             <div className="text-xs font-mono text-[#A1A1AA] mt-2">
               {loading ? 'Loading...' : 'Active players'}
             </div>
-          </div>
+          </motion.div>
 
-          <div className="kt-card p-6">
+          <motion.div variants={fadeInUp} whileHover={{ y: -4 }} className="kt-card p-6">
             <div className="flex items-center justify-between text-[#A1A1AA] mb-2 font-mono text-xs uppercase font-bold">
               <span>Active Tournaments</span>
               <Trophy className="h-5 w-5 text-[#DFE104]" />
@@ -240,9 +266,9 @@ export default function AdminDashboard() {
             <div className="text-xs font-mono text-[#A1A1AA] mt-2">
               {loading ? 'Loading...' : 'Upcoming & Live'}
             </div>
-          </div>
+          </motion.div>
 
-          <div className="kt-card p-6">
+          <motion.div variants={fadeInUp} whileHover={{ y: -4 }} className="kt-card p-6">
             <div className="flex items-center justify-between text-[#A1A1AA] mb-2 font-mono text-xs uppercase font-bold">
               <span>Total Revenue Pool</span>
               <DollarSign className="h-5 w-5 text-[#DFE104]" />
@@ -253,9 +279,9 @@ export default function AdminDashboard() {
             <div className="text-xs font-mono text-[#A1A1AA] mt-2">
               {loading ? 'Loading...' : `Participant: ₹${stats?.totalRevenue || 0} | Prize: ₹${stats?.totalPrizeGiven || 0}`}
             </div>
-          </div>
+          </motion.div>
 
-          <div className="kt-card p-6">
+          <motion.div variants={fadeInUp} whileHover={{ y: -4 }} className="kt-card p-6">
             <div className="flex items-center justify-between text-[#A1A1AA] mb-2 font-mono text-xs uppercase font-bold">
               <span>Live Matches</span>
               <Activity className="h-5 w-5 text-[#DFE104]" />
@@ -266,11 +292,16 @@ export default function AdminDashboard() {
             <div className="text-xs font-mono text-[#A1A1AA] mt-2">
               {loading ? 'Loading...' : 'Currently live'}
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
 
         {/* Analytics Charts Grid */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.2 }}
+          className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-8"
+        >
           <div className="lg:col-span-2 kt-card p-6">
             <h3 className="text-xl font-heading font-extrabold uppercase text-white mb-4">Platform Player & Tournament Growth</h3>
             <div className="h-72">
@@ -291,10 +322,15 @@ export default function AdminDashboard() {
               />
             </div>
           </div>
-        </div>
+        </motion.div>
 
         {/* TanStack Table showcase */}
-        <div className="kt-card p-6">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="kt-card p-6"
+        >
           <div className="flex justify-between items-center mb-6 pb-4 border-b-2 border-[#3F3F46]">
             <h3 className="text-xl font-heading font-extrabold uppercase text-white">Recent Tournaments Overview</h3>
             <span className="text-xs font-mono text-[#A1A1AA] font-semibold uppercase">POWERED BY TANSTACK TABLE</span>
@@ -328,7 +364,7 @@ export default function AdminDashboard() {
               </tbody>
             </table>
           </div>
-        </div>
+        </motion.div>
       </main>
     </div>
   );

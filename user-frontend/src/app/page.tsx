@@ -17,9 +17,25 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import Marquee from 'react-fast-marquee';
+import { motion } from 'framer-motion';
 import Navbar from '@/components/Navbar';
 import { useAuth } from '@/context/AuthContext';
 import api from '@/lib/api';
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 30 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } },
+};
+
+const staggerContainer = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: {
+      staggerChildren: 0.12,
+    },
+  },
+};
 
 export default function Home() {
   const router = useRouter();
@@ -138,53 +154,72 @@ export default function Home() {
 
       {/* Kinetic Hero Section */}
       <section className="relative px-4 sm:px-8 md:px-12 py-12 w-full border-b-2 border-[#3F3F46]">
-        <div className="w-full relative">
+        {/* Animated Background Glowing Blobs */}
+        <motion.div 
+          animate={{ scale: [1, 1.2, 1], opacity: [0.15, 0.3, 0.15] }} 
+          transition={{ duration: 6, repeat: Infinity, ease: "easeInOut" }} 
+          className="absolute top-10 right-20 w-96 h-96 bg-[#DFE104]/20 rounded-full blur-[120px] pointer-events-none" 
+        />
+
+        <motion.div 
+          initial="hidden"
+          animate="visible"
+          variants={staggerContainer}
+          className="w-full relative"
+        >
           {/* Subheader Badge */}
-          <div className="inline-flex items-center space-x-2 px-4 py-2 bg-[#DFE104] text-black text-xs font-heading font-extrabold uppercase tracking-tighter mb-8">
+          <motion.div variants={fadeInUp} className="inline-flex items-center space-x-2 px-4 py-2 bg-[#DFE104] text-black text-xs font-heading font-extrabold uppercase tracking-tighter mb-8">
             <span className="h-2 w-2 bg-black animate-pulse"></span>
             <span>KINETIC CIRCUIT • HIGH-STAKES ARENA</span>
-          </div>
+          </motion.div>
 
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
             <div className="lg:col-span-8 space-y-6">
               {/* Massive Viewport Kinetic Headline */}
-              <h1 className="text-[clamp(3.5rem,11vw,13rem)] leading-[0.85] font-heading font-extrabold uppercase tracking-tighter text-[#FAFAFA]">
+              <motion.h1 variants={fadeInUp} className="text-[clamp(3.5rem,11vw,13rem)] leading-[0.85] font-heading font-extrabold uppercase tracking-tighter text-[#FAFAFA]">
                 DOMINATE THE <br />
                 <span className="text-[#DFE104] underline decoration-[#3F3F46] underline-offset-8">
                   ARENA.
                 </span>
-              </h1>
+              </motion.h1>
 
-              <p className="text-lg md:text-2xl text-[#A1A1AA] leading-relaxed font-body font-medium max-w-3xl pt-4">
+              <motion.p variants={fadeInUp} className="text-lg md:text-2xl text-[#A1A1AA] leading-relaxed font-body font-medium max-w-3xl pt-4">
                 Host, compete, and settle high-stakes esports showdowns. Powered by automated tournament brackets, real-time match lobbies, 12-digit UTR verification, and instant room credentials.
-              </p>
+              </motion.p>
 
-              <div className="flex flex-col sm:flex-row gap-4 pt-6">
-                <Link href={user ? '/tournaments' : '/login'} className="kt-btn-primary text-base">
-                  <span>ENTER ARENA</span>
-                  <ArrowRight className="h-5 w-5 stroke-[3]" />
-                </Link>
-                <Link href="/signup" className="kt-btn-outline text-base">
-                  REGISTER PROFILE
-                </Link>
-              </div>
+              <motion.div variants={fadeInUp} className="flex flex-col sm:flex-row gap-4 pt-6">
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                  <Link href={user ? '/tournaments' : '/login'} className="kt-btn-primary text-base inline-flex items-center justify-center gap-2">
+                    <span>ENTER ARENA</span>
+                    <ArrowRight className="h-5 w-5 stroke-[3]" />
+                  </Link>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+                  <Link href="/signup" className="kt-btn-outline text-base inline-block">
+                    REGISTER PROFILE
+                  </Link>
+                </motion.div>
+              </motion.div>
             </div>
 
             {/* Massive Graphic Number & Trophy */}
-            <div className="lg:col-span-4 relative flex flex-col items-end justify-end">
+            <motion.div variants={fadeInUp} className="lg:col-span-4 relative flex flex-col items-end justify-end">
               <span className="text-[12rem] md:text-[15rem] leading-none font-heading font-extrabold text-[#27272A] select-none pointer-events-none -mb-8">
                 01
               </span>
-              <div className="p-8 bg-[#09090B] border-2 border-[#3F3F46] w-full flex items-center justify-between">
+              <motion.div 
+                whileHover={{ y: -5 }}
+                className="p-8 bg-[#09090B] border-2 border-[#3F3F46] w-full flex items-center justify-between shadow-2xl"
+              >
                 <div>
                   <span className="text-xs font-mono font-bold text-[#DFE104] uppercase block">LIVE PRIZE POOL</span>
                   <span className="text-3xl font-heading font-extrabold text-white">₹5,00,000+</span>
                 </div>
                 <Trophy className="h-10 w-10 text-[#DFE104] stroke-[2]" />
-              </div>
-            </div>
+              </motion.div>
+            </motion.div>
           </div>
-        </div>
+        </motion.div>
       </section>
 
       {/* Infinite Fast Marquee Section (No Gradients) */}
@@ -239,19 +274,29 @@ export default function Home() {
               FEATURED MATCHES
             </h2>
           </div>
-          <Link
-            href="/tournaments"
-            className="kt-btn-outline text-xs"
-          >
-            <span>VIEW ALL MATCHES</span>
-            <ArrowUpRight className="h-4 w-4 stroke-[3]" />
-          </Link>
+          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+            <Link
+              href="/tournaments"
+              className="kt-btn-outline text-xs inline-flex items-center gap-2"
+            >
+              <span>VIEW ALL MATCHES</span>
+              <ArrowUpRight className="h-4 w-4 stroke-[3]" />
+            </Link>
+          </motion.div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+        <motion.div 
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true, margin: '-50px' }}
+          variants={staggerContainer}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+        >
           {featuredTournaments.map((t, idx) => (
-            <div
+            <motion.div
               key={t.id}
+              variants={fadeInUp}
+              whileHover={{ y: -8, transition: { duration: 0.2 } }}
               className="kt-card kt-card-hover p-8 flex flex-col justify-between group cursor-pointer"
             >
               <div>
@@ -278,9 +323,9 @@ export default function Home() {
                   <span className="text-white group-hover:text-black font-mono font-bold">{t.teams}</span>
                 </div>
               </div>
-            </div>
+            </motion.div>
           ))}
-        </div>
+        </motion.div>
       </section>
 
       {/* 4-Step How It Works (Hairline Gap Grid) */}
@@ -292,9 +337,15 @@ export default function Home() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-[#3F3F46] border-y-2 border-[#3F3F46]">
+        <motion.div 
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={staggerContainer}
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-px bg-[#3F3F46] border-y-2 border-[#3F3F46]"
+        >
           {/* Step 1 */}
-          <div className="bg-[#09090B] p-8 flex flex-col justify-between min-h-[300px] relative overflow-hidden group hover:bg-[#27272A] transition-colors">
+          <motion.div variants={fadeInUp} className="bg-[#09090B] p-8 flex flex-col justify-between min-h-[300px] relative overflow-hidden group hover:bg-[#27272A] transition-colors">
             <span className="text-[7rem] font-heading font-extrabold text-[#27272A] group-hover:text-[#DFE104]/30 absolute top-2 right-4 pointer-events-none">01</span>
             <div className="h-12 w-12 bg-[#DFE104] text-black flex items-center justify-center font-bold mb-8 relative z-10">
               <UserCheck className="h-6 w-6 stroke-[2.5]" />
@@ -303,10 +354,10 @@ export default function Home() {
               <h3 className="text-xl font-heading font-extrabold uppercase text-white mb-2">1. REGISTER & LINK</h3>
               <p className="text-sm text-[#A1A1AA] font-body">Create your player profile, link your In-Game Name & Character UID.</p>
             </div>
-          </div>
+          </motion.div>
 
           {/* Step 2 */}
-          <div className="bg-[#09090B] p-8 flex flex-col justify-between min-h-[300px] relative overflow-hidden group hover:bg-[#27272A] transition-colors">
+          <motion.div variants={fadeInUp} className="bg-[#09090B] p-8 flex flex-col justify-between min-h-[300px] relative overflow-hidden group hover:bg-[#27272A] transition-colors">
             <span className="text-[7rem] font-heading font-extrabold text-[#27272A] group-hover:text-[#DFE104]/30 absolute top-2 right-4 pointer-events-none">02</span>
             <div className="h-12 w-12 bg-[#DFE104] text-black flex items-center justify-center font-bold mb-8 relative z-10">
               <ShieldCheck className="h-6 w-6 stroke-[2.5]" />
@@ -315,10 +366,10 @@ export default function Home() {
               <h3 className="text-xl font-heading font-extrabold uppercase text-white mb-2">2. JOIN & VERIFY UTR</h3>
               <p className="text-sm text-[#A1A1AA] font-body">Select match, submit entry fee with 12-digit UTR verification screenshot.</p>
             </div>
-          </div>
+          </motion.div>
 
           {/* Step 3 */}
-          <div className="bg-[#09090B] p-8 flex flex-col justify-between min-h-[300px] relative overflow-hidden group hover:bg-[#27272A] transition-colors">
+          <motion.div variants={fadeInUp} className="bg-[#09090B] p-8 flex flex-col justify-between min-h-[300px] relative overflow-hidden group hover:bg-[#27272A] transition-colors">
             <span className="text-[7rem] font-heading font-extrabold text-[#27272A] group-hover:text-[#DFE104]/30 absolute top-2 right-4 pointer-events-none">03</span>
             <div className="h-12 w-12 bg-[#DFE104] text-black flex items-center justify-center font-bold mb-8 relative z-10">
               <Swords className="h-6 w-6 stroke-[2.5]" />
@@ -327,10 +378,10 @@ export default function Home() {
               <h3 className="text-xl font-heading font-extrabold uppercase text-white mb-2">3. DOMINATE MATCH</h3>
               <p className="text-sm text-[#A1A1AA] font-body">Receive automated Room ID & Password 15 minutes before lobby drop.</p>
             </div>
-          </div>
+          </motion.div>
 
           {/* Step 4 */}
-          <div className="bg-[#09090B] p-8 flex flex-col justify-between min-h-[300px] relative overflow-hidden group hover:bg-[#27272A] transition-colors">
+          <motion.div variants={fadeInUp} className="bg-[#09090B] p-8 flex flex-col justify-between min-h-[300px] relative overflow-hidden group hover:bg-[#27272A] transition-colors">
             <span className="text-[7rem] font-heading font-extrabold text-[#27272A] group-hover:text-[#DFE104]/30 absolute top-2 right-4 pointer-events-none">04</span>
             <div className="h-12 w-12 bg-[#DFE104] text-black flex items-center justify-center font-bold mb-8 relative z-10">
               <Zap className="h-6 w-6 stroke-[2.5]" />
@@ -339,8 +390,8 @@ export default function Home() {
               <h3 className="text-xl font-heading font-extrabold uppercase text-white mb-2">4. INSTANT DEFI PAYOUT</h3>
               <p className="text-sm text-[#A1A1AA] font-body">Match result verified & prize pool transferred instantly to winner account.</p>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* Top Circuit Earners */}
@@ -352,13 +403,15 @@ export default function Home() {
               TOP EARNERS
             </h2>
           </div>
-          <Link
-            href="/leaderboard"
-            className="kt-btn-outline text-xs"
-          >
-            <span>FULL LEADERBOARD</span>
-            <ArrowUpRight className="h-4 w-4 stroke-[3]" />
-          </Link>
+          <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+            <Link
+              href="/leaderboard"
+              className="kt-btn-outline text-xs inline-flex items-center gap-2"
+            >
+              <span>FULL LEADERBOARD</span>
+              <ArrowUpRight className="h-4 w-4 stroke-[3]" />
+            </Link>
+          </motion.div>
         </div>
 
         {loadingEarners ? (
@@ -370,10 +423,18 @@ export default function Home() {
             NO RANKED PLAYERS YET. REGISTER YOUR PROFILE & CLAIM THE CHAMPION SPOT!
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <motion.div 
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true }}
+            variants={staggerContainer}
+            className="grid grid-cols-1 md:grid-cols-3 gap-8"
+          >
             {topEarners.map((player) => (
-              <div
+              <motion.div
                 key={player.name}
+                variants={fadeInUp}
+                whileHover={{ y: -6, scale: 1.02 }}
                 className={`kt-card p-8 text-center relative overflow-hidden ${
                   player.rank === 1 ? 'border-4 border-[#DFE104] bg-[#27272A]/40' : ''
                 }`}
@@ -401,9 +462,9 @@ export default function Home() {
                     <span className="text-[#DFE104] text-base font-heading font-bold">{player.earnings}</span>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             ))}
-          </div>
+          </motion.div>
         )}
       </section>
 
@@ -416,8 +477,14 @@ export default function Home() {
           </h2>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          <div className="kt-card kt-card-hover p-8 group cursor-pointer">
+        <motion.div 
+          initial="hidden"
+          whileInView="visible"
+          viewport={{ once: true }}
+          variants={staggerContainer}
+          className="grid grid-cols-1 md:grid-cols-3 gap-8"
+        >
+          <motion.div variants={fadeInUp} whileHover={{ y: -8 }} className="kt-card kt-card-hover p-8 group cursor-pointer">
             <div className="h-12 w-12 bg-[#DFE104] text-black flex items-center justify-center mb-8 font-bold">
               <Swords className="h-6 w-6 stroke-[2.5]" />
             </div>
@@ -425,9 +492,9 @@ export default function Home() {
             <p className="text-base text-[#A1A1AA] group-hover:text-black font-body">
               Real-time match bracket calculation, single and double elimination flows, and live status updates.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="kt-card kt-card-hover p-8 group cursor-pointer">
+          <motion.div variants={fadeInUp} whileHover={{ y: -8 }} className="kt-card kt-card-hover p-8 group cursor-pointer">
             <div className="h-12 w-12 bg-[#DFE104] text-black flex items-center justify-center mb-8 font-bold">
               <ShieldCheck className="h-6 w-6 stroke-[2.5]" />
             </div>
@@ -435,9 +502,9 @@ export default function Home() {
             <p className="text-base text-[#A1A1AA] group-hover:text-black font-body">
               12-digit UTR verification and payment screenshot proof moderation to guarantee spot reservations.
             </p>
-          </div>
+          </motion.div>
 
-          <div className="kt-card kt-card-hover p-8 group cursor-pointer">
+          <motion.div variants={fadeInUp} whileHover={{ y: -8 }} className="kt-card kt-card-hover p-8 group cursor-pointer">
             <div className="h-12 w-12 bg-[#DFE104] text-black flex items-center justify-center mb-8 font-bold">
               <Users className="h-6 w-6 stroke-[2.5]" />
             </div>
@@ -445,8 +512,8 @@ export default function Home() {
             <p className="text-base text-[#A1A1AA] group-hover:text-black font-body">
               Automated countdown threshold for room ID & password release strictly for paid players.
             </p>
-          </div>
-        </div>
+          </motion.div>
+        </motion.div>
       </section>
 
       {/* Pro Gamer Reviews Marquee */}

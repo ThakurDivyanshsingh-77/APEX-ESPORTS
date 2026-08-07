@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 import {
   Trophy,
   LogOut,
@@ -31,6 +32,7 @@ import { getNotificationIcon } from '@/components/NotificationToast';
 
 export default function Navbar() {
   const router = useRouter();
+  const pathname = usePathname();
   const { user, logout } = useAuth();
   const [notifications, setNotifications] = useState<any[]>([]);
   const [showNotifications, setShowNotifications] = useState(false);
@@ -115,12 +117,21 @@ export default function Navbar() {
   };
 
   return (
-    <header className="sticky top-0 z-50 bg-[#09090B] border-b-2 border-[#3F3F46] px-6 py-4 flex items-center justify-between">
+    <motion.header 
+      initial={{ y: -20, opacity: 0 }}
+      animate={{ y: 0, opacity: 1 }}
+      transition={{ duration: 0.3 }}
+      className="sticky top-0 z-50 bg-[#09090B] border-b-2 border-[#3F3F46] px-6 py-4 flex items-center justify-between"
+    >
       {/* Logo */}
       <Link href={user ? '/tournaments' : '/'} className="flex items-center space-x-3 group">
-        <div className="h-10 w-10 bg-[#DFE104] text-black rounded-none flex items-center justify-center font-bold transition-transform duration-200 group-hover:scale-105">
+        <motion.div 
+          whileHover={{ rotate: 10, scale: 1.1 }}
+          whileTap={{ scale: 0.95 }}
+          className="h-10 w-10 bg-[#DFE104] text-black rounded-none flex items-center justify-center font-bold"
+        >
           <Trophy className="h-5 w-5 text-black stroke-[2.5]" />
-        </div>
+        </motion.div>
         <div className="flex flex-col">
           <span className="text-xl font-heading font-extrabold tracking-tighter text-[#FAFAFA] uppercase group-hover:text-[#DFE104] transition-colors flex items-center gap-2">
             APEX ESPORTS
@@ -136,14 +147,22 @@ export default function Navbar() {
           <>
             <Link
               href="/tournaments"
-              className="px-4 py-2 border-2 border-transparent hover:border-[#3F3F46] hover:text-[#DFE104] hover:bg-[#27272A] transition-all flex items-center gap-2"
+              className={`relative px-4 py-2 border-2 transition-all flex items-center gap-2 ${
+                pathname.startsWith('/tournaments')
+                  ? 'border-[#DFE104] text-[#DFE104] bg-[#27272A]'
+                  : 'border-transparent hover:border-[#3F3F46] hover:text-[#DFE104] hover:bg-[#27272A]'
+              }`}
             >
               <Gamepad2 className="h-4 w-4 stroke-[2]" />
               <span>TOURNAMENTS</span>
             </Link>
             <Link
               href="/dashboard"
-              className="px-4 py-2 border-2 border-transparent hover:border-[#3F3F46] hover:text-[#DFE104] hover:bg-[#27272A] transition-all flex items-center gap-2"
+              className={`relative px-4 py-2 border-2 transition-all flex items-center gap-2 ${
+                pathname === '/dashboard'
+                  ? 'border-[#DFE104] text-[#DFE104] bg-[#27272A]'
+                  : 'border-transparent hover:border-[#3F3F46] hover:text-[#DFE104] hover:bg-[#27272A]'
+              }`}
             >
               <Trophy className="h-4 w-4 stroke-[2]" />
               <span>MY MATCHES</span>
@@ -153,69 +172,89 @@ export default function Navbar() {
             <div className="relative">
               <button
                 onClick={() => setShowCommunityMenu(!showCommunityMenu)}
-                className="px-4 py-2 border-2 border-transparent hover:border-[#3F3F46] hover:text-[#DFE104] hover:bg-[#27272A] transition-all flex items-center gap-1.5"
+                className={`px-4 py-2 border-2 transition-all flex items-center gap-1.5 ${
+                  pathname.startsWith('/community')
+                    ? 'border-[#DFE104] text-[#DFE104] bg-[#27272A]'
+                    : 'border-transparent hover:border-[#3F3F46] hover:text-[#DFE104] hover:bg-[#27272A]'
+                }`}
               >
                 <Users className="h-4 w-4 stroke-[2]" />
                 <span>COMMUNITY</span>
-                <ChevronDown className="h-3.5 w-3.5 stroke-[2]" />
+                <ChevronDown className={`h-3.5 w-3.5 stroke-[2] transition-transform ${showCommunityMenu ? 'rotate-180' : ''}`} />
               </button>
 
-              {showCommunityMenu && (
-                <div className="absolute left-0 mt-2 w-56 bg-[#0D1117] border-2 border-[#3F3F46] shadow-2xl p-2 z-50 space-y-1">
-                  <Link
-                    href="/community/players"
-                    onClick={() => setShowCommunityMenu(false)}
-                    className="flex items-center space-x-3 px-3 py-2 text-xs font-bold uppercase text-[#FAFAFA] hover:bg-[#DFE104] hover:text-black transition-all"
+              <AnimatePresence>
+                {showCommunityMenu && (
+                  <motion.div
+                    initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute left-0 mt-2 w-56 bg-[#0D1117] border-2 border-[#3F3F46] shadow-2xl p-2 z-50 space-y-1"
                   >
-                    <Users className="h-4 w-4" />
-                    <span>PLAYERS DIRECTORY</span>
-                  </Link>
-                  <Link
-                    href="/community/friends"
-                    onClick={() => setShowCommunityMenu(false)}
-                    className="flex items-center space-x-3 px-3 py-2 text-xs font-bold uppercase text-[#FAFAFA] hover:bg-[#DFE104] hover:text-black transition-all"
-                  >
-                    <UsersRound className="h-4 w-4" />
-                    <span>FRIENDS & REQUESTS</span>
-                  </Link>
-                  <Link
-                    href="/community/chat"
-                    onClick={() => setShowCommunityMenu(false)}
-                    className="flex items-center space-x-3 px-3 py-2 text-xs font-bold uppercase text-[#FAFAFA] hover:bg-[#DFE104] hover:text-black transition-all"
-                  >
-                    <MessageSquare className="h-4 w-4" />
-                    <span>DIRECT CHAT</span>
-                  </Link>
-                  <Link
-                    href="/community/teams"
-                    onClick={() => setShowCommunityMenu(false)}
-                    className="flex items-center space-x-3 px-3 py-2 text-xs font-bold uppercase text-[#FAFAFA] hover:bg-[#DFE104] hover:text-black transition-all"
-                  >
-                    <Trophy className="h-4 w-4" />
-                    <span>TEAMS & CLANS</span>
-                  </Link>
-                  <Link
-                    href="/community/team-leaderboard"
-                    onClick={() => setShowCommunityMenu(false)}
-                    className="flex items-center space-x-3 px-3 py-2 text-xs font-bold uppercase text-[#FAFAFA] hover:bg-[#DFE104] hover:text-black transition-all border-t border-white/10 pt-2"
-                  >
-                    <Award className="h-4 w-4 text-[#DFE104]" />
-                    <span>TEAM LEADERBOARD</span>
-                  </Link>
-                </div>
-              )}
+                    <Link
+                      href="/community/players"
+                      onClick={() => setShowCommunityMenu(false)}
+                      className="flex items-center space-x-3 px-3 py-2 text-xs font-bold uppercase text-[#FAFAFA] hover:bg-[#DFE104] hover:text-black transition-all"
+                    >
+                      <Users className="h-4 w-4" />
+                      <span>PLAYERS DIRECTORY</span>
+                    </Link>
+                    <Link
+                      href="/community/friends"
+                      onClick={() => setShowCommunityMenu(false)}
+                      className="flex items-center space-x-3 px-3 py-2 text-xs font-bold uppercase text-[#FAFAFA] hover:bg-[#DFE104] hover:text-black transition-all"
+                    >
+                      <UsersRound className="h-4 w-4" />
+                      <span>FRIENDS & REQUESTS</span>
+                    </Link>
+                    <Link
+                      href="/community/chat"
+                      onClick={() => setShowCommunityMenu(false)}
+                      className="flex items-center space-x-3 px-3 py-2 text-xs font-bold uppercase text-[#FAFAFA] hover:bg-[#DFE104] hover:text-black transition-all"
+                    >
+                      <MessageSquare className="h-4 w-4" />
+                      <span>DIRECT CHAT</span>
+                    </Link>
+                    <Link
+                      href="/community/teams"
+                      onClick={() => setShowCommunityMenu(false)}
+                      className="flex items-center space-x-3 px-3 py-2 text-xs font-bold uppercase text-[#FAFAFA] hover:bg-[#DFE104] hover:text-black transition-all"
+                    >
+                      <Trophy className="h-4 w-4" />
+                      <span>TEAMS & CLANS</span>
+                    </Link>
+                    <Link
+                      href="/community/team-leaderboard"
+                      onClick={() => setShowCommunityMenu(false)}
+                      className="flex items-center space-x-3 px-3 py-2 text-xs font-bold uppercase text-[#FAFAFA] hover:bg-[#DFE104] hover:text-black transition-all border-t border-white/10 pt-2"
+                    >
+                      <Award className="h-4 w-4 text-[#DFE104]" />
+                      <span>TEAM LEADERBOARD</span>
+                    </Link>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             <Link
               href="/leaderboard"
-              className="px-4 py-2 border-2 border-transparent hover:border-[#3F3F46] hover:text-[#DFE104] hover:bg-[#27272A] transition-all flex items-center gap-2"
+              className={`px-4 py-2 border-2 transition-all flex items-center gap-2 ${
+                pathname === '/leaderboard'
+                  ? 'border-[#DFE104] text-[#DFE104] bg-[#27272A]'
+                  : 'border-transparent hover:border-[#3F3F46] hover:text-[#DFE104] hover:bg-[#27272A]'
+              }`}
             >
               <Award className="h-4 w-4 stroke-[2]" />
               <span>LEADERBOARD</span>
             </Link>
             <Link
               href="/support"
-              className="px-4 py-2 border-2 border-transparent hover:border-[#3F3F46] hover:text-[#DFE104] hover:bg-[#27272A] transition-all flex items-center gap-2"
+              className={`px-4 py-2 border-2 transition-all flex items-center gap-2 ${
+                pathname === '/support'
+                  ? 'border-[#DFE104] text-[#DFE104] bg-[#27272A]'
+                  : 'border-transparent hover:border-[#3F3F46] hover:text-[#DFE104] hover:bg-[#27272A]'
+              }`}
             >
               <HelpCircle className="h-4 w-4 stroke-[2]" />
               <span>SUPPORT & HELPDESK</span>
@@ -236,158 +275,179 @@ export default function Navbar() {
           <div className="flex items-center space-x-3 relative">
             {/* Notification Bell Button */}
             <div className="relative">
-              <button
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
                 onClick={() => setShowNotifications(!showNotifications)}
                 className="p-2.5 bg-[#27272A] border-2 border-[#3F3F46] hover:border-[#DFE104] text-[#FAFAFA] transition-all relative group"
                 title="Notifications"
               >
-                <Bell className={`h-4 w-4 stroke-[2] ${unreadCount > 0 ? 'text-[#DFE104] animate-bounce' : ''}`} />
+                <Bell className={`h-4 w-4 stroke-[2] ${unreadCount > 0 ? 'text-[#DFE104]' : ''}`} />
                 {unreadCount > 0 && (
-                  <span className="absolute -top-2 -right-2 h-5 w-5 bg-[#DFE104] text-black font-extrabold text-[10px] flex items-center justify-center animate-pulse">
+                  <motion.span 
+                    initial={{ scale: 0 }}
+                    animate={{ scale: [1, 1.25, 1] }}
+                    transition={{ repeat: Infinity, duration: 2 }}
+                    className="absolute -top-2 -right-2 h-5 w-5 bg-[#DFE104] text-black font-extrabold text-[10px] flex items-center justify-center"
+                  >
                     {unreadCount > 9 ? '9+' : unreadCount}
-                  </span>
+                  </motion.span>
                 )}
-              </button>
+              </motion.button>
 
               {/* Dropdown Menu Drawer */}
-              {showNotifications && (
-                <div className="absolute right-[-70px] sm:right-0 mt-3 w-[92vw] max-w-sm sm:w-96 bg-[#09090B] border-2 border-[#3F3F46] p-4 z-50 max-h-[85vh] overflow-y-auto shadow-2xl">
-                  {/* Push Permission Prompt Banner */}
-                  {permission !== 'granted' && (
-                    <div className="mb-3 p-3 bg-[#DFE104]/10 border border-[#DFE104]/40 rounded-xl flex items-center justify-between text-xs">
-                      <div className="flex items-center gap-2 text-[#DFE104] font-bold">
-                        <BellRing className="h-4 w-4 shrink-0" />
-                        <span>ENABLE PUSH ALERTS</span>
-                      </div>
-                      <button
-                        onClick={requestPermission}
-                        className="px-2.5 py-1 bg-[#DFE104] text-black font-extrabold text-[10px] uppercase rounded hover:bg-white transition-colors"
-                      >
-                        ENABLE
-                      </button>
-                    </div>
-                  )}
-
-                  <div className="flex items-center justify-between border-b-2 border-[#3F3F46] pb-3 mb-3">
-                    <span className="text-xs font-heading font-extrabold uppercase tracking-tighter text-[#DFE104] flex items-center gap-1.5">
-                      <Sparkles className="h-4 w-4 stroke-[2]" />
-                      NOTIFICATIONS ({unreadCount})
-                    </span>
-
-                    <div className="flex items-center gap-2">
-                      {unreadCount > 0 && (
-                        <button
-                          onClick={handleMarkAllAsRead}
-                          className="text-[10px] font-heading uppercase font-bold text-[#DFE104] hover:underline"
-                        >
-                          MARK ALL READ
-                        </button>
-                      )}
-                      <button
-                        onClick={() => setShowNotifications(false)}
-                        className="text-[#A1A1AA] hover:text-[#FAFAFA]"
-                      >
-                        <X className="h-4 w-4 stroke-[2]" />
-                      </button>
-                    </div>
-                  </div>
-
-                  {notifications.length === 0 ? (
-                    <div className="py-8 text-center text-xs text-[#A1A1AA] font-mono uppercase font-bold space-y-2">
-                      <Bell className="h-8 w-8 mx-auto text-[#3F3F46]" />
-                      <p>NO NOTIFICATIONS YET.</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-2">
-                      {notifications.map((n) => (
-                        <div
-                          key={n._id}
-                          onClick={() => handleNotificationClick(n)}
-                          className={`p-3 border text-xs transition-all cursor-pointer rounded-xl flex items-start space-x-3 ${
-                            n.read
-                              ? 'bg-[#18181B]/60 border-[#27272A] text-[#A1A1AA] hover:bg-[#27272A]/50'
-                              : 'bg-[#18181B] text-white border-[#DFE104]/50 font-bold hover:border-[#DFE104] shadow-md'
-                          }`}
-                        >
-                          <div className="p-2 rounded-lg bg-white/5 shrink-0 mt-0.5">
-                            {getNotificationIcon(n.type)}
-                          </div>
-
-                          <div className="flex-1 min-w-0">
-                            <div className="flex items-center justify-between gap-1 mb-1">
-                              <span className="font-extrabold uppercase tracking-tight text-white truncate text-xs">
-                                {n.title}
-                              </span>
-                              {!n.read && (
-                                <button
-                                  onClick={(e) => handleMarkAsRead(n._id, e)}
-                                  className="text-[9px] font-mono uppercase font-bold text-[#DFE104] hover:underline shrink-0"
-                                >
-                                  READ
-                                </button>
-                              )}
-                            </div>
-                            <p className="leading-relaxed text-[11px] text-[#A1A1AA] line-clamp-2">{n.message}</p>
-                            <div className="flex items-center justify-between mt-2 pt-1 border-t border-white/5">
-                              <span className="text-[9px] font-mono text-[#71717A] uppercase">
-                                {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                              </span>
-                              {n.link && (
-                                <span className="text-[9px] font-mono font-bold text-[#DFE104] uppercase flex items-center gap-0.5">
-                                  OPEN <ExternalLink className="h-2.5 w-2.5" />
-                                </span>
-                              )}
-                            </div>
-                          </div>
+              <AnimatePresence>
+                {showNotifications && (
+                  <motion.div 
+                    initial={{ opacity: 0, y: 12, scale: 0.95 }}
+                    animate={{ opacity: 1, y: 0, scale: 1 }}
+                    exit={{ opacity: 0, y: 12, scale: 0.95 }}
+                    transition={{ duration: 0.15 }}
+                    className="absolute right-[-70px] sm:right-0 mt-3 w-[92vw] max-w-sm sm:w-96 bg-[#09090B] border-2 border-[#3F3F46] p-4 z-50 max-h-[85vh] overflow-y-auto shadow-2xl"
+                  >
+                    {/* Push Permission Prompt Banner */}
+                    {permission !== 'granted' && (
+                      <div className="mb-3 p-3 bg-[#DFE104]/10 border border-[#DFE104]/40 rounded-xl flex items-center justify-between text-xs">
+                        <div className="flex items-center gap-2 text-[#DFE104] font-bold">
+                          <BellRing className="h-4 w-4 shrink-0" />
+                          <span>ENABLE PUSH ALERTS</span>
                         </div>
-                      ))}
-                    </div>
-                  )}
+                        <button
+                          onClick={requestPermission}
+                          className="px-2.5 py-1 bg-[#DFE104] text-black font-extrabold text-[10px] uppercase rounded hover:bg-white transition-colors"
+                        >
+                          ENABLE
+                        </button>
+                      </div>
+                    )}
 
-                  <div className="mt-4 pt-3 border-t-2 border-[#3F3F46] text-center">
-                    <Link
-                      href="/notifications"
-                      onClick={() => setShowNotifications(false)}
-                      className="inline-flex items-center justify-center gap-2 text-xs font-heading font-extrabold text-[#DFE104] hover:underline uppercase tracking-wide"
-                    >
-                      <span>VIEW ALL NOTIFICATIONS</span>
-                      <ExternalLink className="h-3.5 w-3.5" />
-                    </Link>
-                  </div>
-                </div>
-              )}
+                    <div className="flex items-center justify-between border-b-2 border-[#3F3F46] pb-3 mb-3">
+                      <span className="text-xs font-heading font-extrabold uppercase tracking-tighter text-[#DFE104] flex items-center gap-1.5">
+                        <Sparkles className="h-4 w-4 stroke-[2]" />
+                        NOTIFICATIONS ({unreadCount})
+                      </span>
+
+                      <div className="flex items-center gap-2">
+                        {unreadCount > 0 && (
+                          <button
+                            onClick={handleMarkAllAsRead}
+                            className="text-[10px] font-heading uppercase font-bold text-[#DFE104] hover:underline"
+                          >
+                            MARK ALL READ
+                          </button>
+                        )}
+                        <button
+                          onClick={() => setShowNotifications(false)}
+                          className="text-[#A1A1AA] hover:text-[#FAFAFA]"
+                        >
+                          <X className="h-4 w-4 stroke-[2]" />
+                        </button>
+                      </div>
+                    </div>
+
+                    {notifications.length === 0 ? (
+                      <div className="py-8 text-center text-xs text-[#A1A1AA] font-mono uppercase font-bold space-y-2">
+                        <Bell className="h-8 w-8 mx-auto text-[#3F3F46]" />
+                        <p>NO NOTIFICATIONS YET.</p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {notifications.map((n) => (
+                          <motion.div
+                            key={n._id}
+                            whileHover={{ x: 3 }}
+                            onClick={() => handleNotificationClick(n)}
+                            className={`p-3 border text-xs transition-all cursor-pointer rounded-xl flex items-start space-x-3 ${
+                              n.read
+                                ? 'bg-[#18181B]/60 border-[#27272A] text-[#A1A1AA] hover:bg-[#27272A]/50'
+                                : 'bg-[#18181B] text-white border-[#DFE104]/50 font-bold hover:border-[#DFE104] shadow-md'
+                            }`}
+                          >
+                            <div className="p-2 rounded-lg bg-white/5 shrink-0 mt-0.5">
+                              {getNotificationIcon(n.type)}
+                            </div>
+
+                            <div className="flex-1 min-w-0">
+                              <div className="flex items-center justify-between gap-1 mb-1">
+                                <span className="font-extrabold uppercase tracking-tight text-white truncate text-xs">
+                                  {n.title}
+                                </span>
+                                {!n.read && (
+                                  <button
+                                    onClick={(e) => handleMarkAsRead(n._id, e)}
+                                    className="text-[9px] font-mono uppercase font-bold text-[#DFE104] hover:underline shrink-0"
+                                  >
+                                    READ
+                                  </button>
+                                )}
+                              </div>
+                              <p className="leading-relaxed text-[11px] text-[#A1A1AA] line-clamp-2">{n.message}</p>
+                              <div className="flex items-center justify-between mt-2 pt-1 border-t border-white/5">
+                                <span className="text-[9px] font-mono text-[#71717A] uppercase">
+                                  {new Date(n.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                </span>
+                                {n.link && (
+                                  <span className="text-[9px] font-mono font-bold text-[#DFE104] uppercase flex items-center gap-0.5">
+                                    OPEN <ExternalLink className="h-2.5 w-2.5" />
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          </motion.div>
+                        ))}
+                      </div>
+                    )}
+
+                    <div className="mt-4 pt-3 border-t-2 border-[#3F3F46] text-center">
+                      <Link
+                        href="/notifications"
+                        onClick={() => setShowNotifications(false)}
+                        className="inline-flex items-center justify-center gap-2 text-xs font-heading font-extrabold text-[#DFE104] hover:underline uppercase tracking-wide"
+                      >
+                        <span>VIEW ALL NOTIFICATIONS</span>
+                        <ExternalLink className="h-3.5 w-3.5" />
+                      </Link>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
 
             {/* Profile Avatar Button */}
-            <Link
-              href="/dashboard"
-              className="flex items-center space-x-2 px-4 py-2 border-2 border-[#3F3F46] bg-[#27272A] hover:bg-[#DFE104] hover:text-black hover:border-[#DFE104] text-xs font-heading font-extrabold uppercase tracking-tighter text-[#FAFAFA] transition-all group"
-            >
-              <img
-                src={user.profileImage || 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150&auto=format&fit=crop&q=80'}
-                alt={user.name}
-                className="h-6 w-6 rounded-none object-cover border border-black"
-              />
-              <span className="hidden sm:inline font-heading">{user.name}</span>
-            </Link>
+            <motion.div whileHover={{ scale: 1.03 }} whileTap={{ scale: 0.97 }}>
+              <Link
+                href="/dashboard"
+                className="flex items-center space-x-2 px-4 py-2 border-2 border-[#3F3F46] bg-[#27272A] hover:bg-[#DFE104] hover:text-black hover:border-[#DFE104] text-xs font-heading font-extrabold uppercase tracking-tighter text-[#FAFAFA] transition-all group"
+              >
+                <img
+                  src={user.profileImage || 'https://images.unsplash.com/photo-1566492031773-4f4e44671857?w=150&auto=format&fit=crop&q=80'}
+                  alt={user.name}
+                  className="h-6 w-6 rounded-none object-cover border border-black"
+                />
+                <span className="hidden sm:inline font-heading">{user.name}</span>
+              </Link>
+            </motion.div>
 
             {/* Logout Button */}
-            <button
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={handleLogout}
               title="Logout"
               className="p-2.5 bg-[#27272A] border-2 border-[#3F3F46] text-[#FAFAFA] hover:bg-red-600 hover:border-red-600 transition-colors"
             >
               <LogOut className="h-4 w-4 stroke-[2]" />
-            </button>
+            </motion.button>
 
             {/* Mobile Hamburger Toggle Button */}
-            <button
+            <motion.button
+              whileTap={{ scale: 0.9 }}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden p-2.5 bg-[#27272A] border-2 border-[#3F3F46] text-[#FAFAFA] hover:border-[#DFE104] transition-all"
               title="Toggle Mobile Menu"
             >
               {mobileMenuOpen ? <X className="h-5 w-5 stroke-[2.5]" /> : <Menu className="h-5 w-5 stroke-[2.5]" />}
-            </button>
+            </motion.button>
           </div>
         ) : (
           <div className="flex items-center space-x-3">
@@ -397,146 +457,157 @@ export default function Navbar() {
             >
               SIGN IN
             </Link>
-            <Link
-              href="/signup"
-              className="kt-btn-primary text-xs !py-2.5 !px-5"
-            >
-              REGISTER PROFILE
-            </Link>
+            <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+              <Link
+                href="/signup"
+                className="kt-btn-primary text-xs !py-2.5 !px-5 inline-block"
+              >
+                REGISTER PROFILE
+              </Link>
+            </motion.div>
             {/* Mobile Hamburger Toggle for Guest */}
-            <button
+            <motion.button
+              whileTap={{ scale: 0.9 }}
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
               className="md:hidden p-2.5 bg-[#27272A] border-2 border-[#3F3F46] text-[#FAFAFA] hover:border-[#DFE104] transition-all"
               title="Toggle Mobile Menu"
             >
               {mobileMenuOpen ? <X className="h-5 w-5 stroke-[2.5]" /> : <Menu className="h-5 w-5 stroke-[2.5]" />}
-            </button>
+            </motion.button>
           </div>
         )}
       </div>
 
       {/* Mobile Drawer Overlay */}
-      {mobileMenuOpen && (
-        <div className="md:hidden fixed inset-x-0 top-[73px] bg-[#0D1117]/95 backdrop-blur-xl border-b-2 border-[#3F3F46] p-6 z-40 space-y-4 shadow-2xl animate-in slide-in-from-top duration-200">
-          <nav className="flex flex-col space-y-2 text-xs font-heading font-extrabold uppercase tracking-wider text-[#FAFAFA]">
-            {user ? (
-              <>
-                <Link
-                  href="/tournaments"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center space-x-3 hover:bg-[#DFE104] hover:text-black transition-all"
-                >
-                  <Gamepad2 className="h-5 w-5 text-[#DFE104]" />
-                  <span>TOURNAMENTS & ARENA</span>
-                </Link>
-                <Link
-                  href="/notifications"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center space-x-3 hover:bg-[#DFE104] hover:text-black transition-all"
-                >
-                  <Bell className="h-5 w-5 text-[#DFE104]" />
-                  <span>NOTIFICATIONS CENTER ({unreadCount})</span>
-                </Link>
-                <Link
-                  href="/dashboard"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center space-x-3 hover:bg-[#DFE104] hover:text-black transition-all"
-                >
-                  <Trophy className="h-5 w-5 text-[#DFE104]" />
-                  <span>MY MATCHES & PROFILE</span>
-                </Link>
-                <Link
-                  href="/community/players"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center space-x-3 hover:bg-[#DFE104] hover:text-black transition-all"
-                >
-                  <Users className="h-5 w-5 text-[#DFE104]" />
-                  <span>PLAYERS DIRECTORY</span>
-                </Link>
-                <Link
-                  href="/community/friends"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center space-x-3 hover:bg-[#DFE104] hover:text-black transition-all"
-                >
-                  <UsersRound className="h-5 w-5 text-[#DFE104]" />
-                  <span>FRIENDS & REQUESTS</span>
-                </Link>
-                <Link
-                  href="/community/chat"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center space-x-3 hover:bg-[#DFE104] hover:text-black transition-all"
-                >
-                  <MessageSquare className="h-5 w-5 text-[#DFE104]" />
-                  <span>DIRECT CHAT</span>
-                </Link>
-                <Link
-                  href="/community/teams"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center space-x-3 hover:bg-[#DFE104] hover:text-black transition-all"
-                >
-                  <Trophy className="h-5 w-5 text-[#DFE104]" />
-                  <span>TEAMS & CLANS</span>
-                </Link>
-                <Link
-                  href="/community/team-leaderboard"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center space-x-3 hover:bg-[#DFE104] hover:text-black transition-all"
-                >
-                  <Award className="h-5 w-5 text-[#DFE104]" />
-                  <span>TEAM LEADERBOARD</span>
-                </Link>
-                <Link
-                  href="/leaderboard"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center space-x-3 hover:bg-[#DFE104] hover:text-black transition-all"
-                >
-                  <Award className="h-5 w-5 text-[#DFE104]" />
-                  <span>GLOBAL LEADERBOARD</span>
-                </Link>
-                <Link
-                  href="/support"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center space-x-3 hover:bg-[#DFE104] hover:text-black transition-all"
-                >
-                  <HelpCircle className="h-5 w-5 text-[#DFE104]" />
-                  <span>SUPPORT & HELPDESK</span>
-                </Link>
-              </>
-            ) : (
-              <>
-                <Link
-                  href="/"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-[#DFE104] hover:text-black transition-all"
-                >
-                  HOME ARENA
-                </Link>
-                <Link
-                  href="/leaderboard"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-[#DFE104] hover:text-black transition-all"
-                >
-                  GLOBAL LEADERBOARD
-                </Link>
-                <Link
-                  href="/login"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-[#DFE104] hover:text-black transition-all"
-                >
-                  SIGN IN
-                </Link>
-                <Link
-                  href="/signup"
-                  onClick={() => setMobileMenuOpen(false)}
-                  className="p-3 bg-[#DFE104] text-black font-extrabold rounded-xl hover:bg-white transition-all text-center"
-                >
-                  CREATE ATHLETE PROFILE
-                </Link>
-              </>
-            )}
-          </nav>
-        </div>
-      )}
-    </header>
+      <AnimatePresence>
+        {mobileMenuOpen && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            transition={{ duration: 0.2 }}
+            className="md:hidden fixed inset-x-0 top-[73px] bg-[#0D1117]/95 backdrop-blur-xl border-b-2 border-[#3F3F46] p-6 z-40 space-y-4 shadow-2xl overflow-hidden"
+          >
+            <nav className="flex flex-col space-y-2 text-xs font-heading font-extrabold uppercase tracking-wider text-[#FAFAFA]">
+              {user ? (
+                <>
+                  <Link
+                    href="/tournaments"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center space-x-3 hover:bg-[#DFE104] hover:text-black transition-all"
+                  >
+                    <Gamepad2 className="h-5 w-5 text-[#DFE104]" />
+                    <span>TOURNAMENTS & ARENA</span>
+                  </Link>
+                  <Link
+                    href="/notifications"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center space-x-3 hover:bg-[#DFE104] hover:text-black transition-all"
+                  >
+                    <Bell className="h-5 w-5 text-[#DFE104]" />
+                    <span>NOTIFICATIONS CENTER ({unreadCount})</span>
+                  </Link>
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center space-x-3 hover:bg-[#DFE104] hover:text-black transition-all"
+                  >
+                    <Trophy className="h-5 w-5 text-[#DFE104]" />
+                    <span>MY MATCHES & PROFILE</span>
+                  </Link>
+                  <Link
+                    href="/community/players"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center space-x-3 hover:bg-[#DFE104] hover:text-black transition-all"
+                  >
+                    <Users className="h-5 w-5 text-[#DFE104]" />
+                    <span>PLAYERS DIRECTORY</span>
+                  </Link>
+                  <Link
+                    href="/community/friends"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center space-x-3 hover:bg-[#DFE104] hover:text-black transition-all"
+                  >
+                    <UsersRound className="h-5 w-5 text-[#DFE104]" />
+                    <span>FRIENDS & REQUESTS</span>
+                  </Link>
+                  <Link
+                    href="/community/chat"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center space-x-3 hover:bg-[#DFE104] hover:text-black transition-all"
+                  >
+                    <MessageSquare className="h-5 w-5 text-[#DFE104]" />
+                    <span>DIRECT CHAT</span>
+                  </Link>
+                  <Link
+                    href="/community/teams"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center space-x-3 hover:bg-[#DFE104] hover:text-black transition-all"
+                  >
+                    <Trophy className="h-5 w-5 text-[#DFE104]" />
+                    <span>TEAMS & CLANS</span>
+                  </Link>
+                  <Link
+                    href="/community/team-leaderboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center space-x-3 hover:bg-[#DFE104] hover:text-black transition-all"
+                  >
+                    <Award className="h-5 w-5 text-[#DFE104]" />
+                    <span>TEAM LEADERBOARD</span>
+                  </Link>
+                  <Link
+                    href="/leaderboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center space-x-3 hover:bg-[#DFE104] hover:text-black transition-all"
+                  >
+                    <Award className="h-5 w-5 text-[#DFE104]" />
+                    <span>GLOBAL LEADERBOARD</span>
+                  </Link>
+                  <Link
+                    href="/support"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-3 bg-white/5 border border-white/10 rounded-xl flex items-center space-x-3 hover:bg-[#DFE104] hover:text-black transition-all"
+                  >
+                    <HelpCircle className="h-5 w-5 text-[#DFE104]" />
+                    <span>SUPPORT & HELPDESK</span>
+                  </Link>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-[#DFE104] hover:text-black transition-all"
+                  >
+                    HOME ARENA
+                  </Link>
+                  <Link
+                    href="/leaderboard"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-[#DFE104] hover:text-black transition-all"
+                  >
+                    GLOBAL LEADERBOARD
+                  </Link>
+                  <Link
+                    href="/login"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-3 bg-white/5 border border-white/10 rounded-xl hover:bg-[#DFE104] hover:text-black transition-all"
+                  >
+                    SIGN IN
+                  </Link>
+                  <Link
+                    href="/signup"
+                    onClick={() => setMobileMenuOpen(false)}
+                    className="p-3 bg-[#DFE104] text-black font-extrabold rounded-xl hover:bg-white transition-all text-center"
+                  >
+                    CREATE ATHLETE PROFILE
+                  </Link>
+                </>
+              )}
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </motion.header>
   );
 }

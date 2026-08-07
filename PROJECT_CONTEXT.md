@@ -33,6 +33,8 @@ The **Esports Tournament Platform** is a full-stack web ecosystem designed to or
 - **Data Table**: `@tanstack/react-table`
 - **Analytics & Data Viz**: Chart.js (`react-chartjs-2`: Line & Doughnut Charts)
 - **State & Data Fetching**: `@tanstack/react-query`, Axios
+- **Animations & Icons**: Framer Motion, Lucide React
+
 
 ---
 
@@ -505,6 +507,27 @@ interface ILeaderboard {
 - **5-Minute Post-Completion Auto-Lock**: Added `completedAt` timestamp tracking to `Tournament` model schema ([tournamentModel.js](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/backend/src/models/tournamentModel.js)). Chat auto-locks exactly 5 minutes post tournament completion (`tournamentStatus === 'COMPLETED'`).
 - **Dynamic Winner Prize Pool Breakdown** ([page.tsx](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/user-frontend/src/app/tournaments/%5Bid%5D/page.tsx)): Added dynamic prize breakdown rows in the Tournament Summary sidebar card. Reads `winnerCount` ('1', '2', or '3') and `prizeBreakdown` (first, second, third prizes) set by admin. Automatically displays 🥇 1st Prize, 🥈 2nd Prize, and 🥉 3rd Prize conditionally based on declared winner count.
 - **Custom Pacman Loading Animation Integration** ([globals.css](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/user-frontend/src/app/globals.css) & [PacmanLoader.tsx](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/user-frontend/src/components/PacmanLoader.tsx)): Added Uiverse Pacman eating dots CSS animation matching neon yellow theme (`#EFF107`). Integrated into Next.js App Router root [loading.tsx](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/user-frontend/src/app/loading.tsx) and page loading states (`Tournaments`, `Tournament Details`, `Leaderboard`, `Dashboard`).
+
+### Comprehensive UI/UX & Framer Motion Animations Overhaul (Completed 2026-07-28)
+- **Framer Motion Setup & Dependency Integration**: Installed and configured `framer-motion` (`^11.0.8`) across `user-frontend` and `admin-frontend`.
+- **Navigation & Mobile Drawer Motion Architecture** ([Navbar.tsx](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/user-frontend/src/components/Navbar.tsx), [AdminSidebar.tsx](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/admin-frontend/src/components/AdminSidebar.tsx)):
+  - Added spring motion to header logo, nav buttons, and active tab highlights.
+  - Wrapped notification dropdown drawer, community menu, and mobile navigation drawer in `AnimatePresence` for smooth exit & enter animations.
+  - Upgraded Admin Sidebar with item spring hover effects (`whileHover={{ x: 4 }}`).
+- **Kinetic Landing Page Staggered Motion** ([page.tsx](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/user-frontend/src/app/page.tsx)):
+  - Added staggered motion entrance (`staggerContainer`) for hero title, subtitle, CTA buttons, and stats cards.
+  - Added ambient animated background glowing blobs (`animate={{ scale: [1, 1.2, 1] }}`).
+  - Integrated scroll-triggered card entrance animations (`whileInView`) and interactive card hover tilt effects (`whileHover={{ y: -8 }}`).
+- **Tournaments Arena Staggered Motion** ([tournaments/page.tsx](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/user-frontend/src/app/tournaments/page.tsx)):
+  - Added spring motion animations to game filter category pill buttons.
+  - Animated tournament grid cards with staggered motion children and dynamic hover glow transitions (`shadow-[0_0_30px_-10px_rgba(223,225,4,0.25)]`).
+- **Global Leaderboard Podium & Data Table Motion** ([leaderboard/page.tsx](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/user-frontend/src/app/leaderboard/page.tsx)):
+  - #1 Champion, #2 Silver, and #3 Bronze podium cards animated with spring scale-up and glowing halo rings.
+  - Staggered leaderboard data table row entrance animations (`motion.tr`).
+- **Spring Backdrop & Modal Popups** ([PaymentModal.tsx](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/user-frontend/src/components/PaymentModal.tsx)):
+  - Wrapped UPI payment modal with `AnimatePresence` and spring scale-up entrance (`type: 'spring', stiffness: 300, damping: 25`).
+- **Admin Dashboard Metrics Stagger** ([admin-frontend/src/app/page.tsx](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/admin-frontend/src/app/page.tsx)):
+  - Added staggered motion entrance for total users, active tournaments, revenue pool, and live matches metric cards.
 - **Global Indian Rupee (₹) Currency Standardization**: Replaced all remaining dollar signs (`$`) across the website with Indian Rupees (`₹`) in entry fees, winner cash prizes, payment modals, leaderboard earnings, and backend persistent stores.
 - **Comprehensive User Profile Edit Feature** ([page.tsx](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/user-frontend/src/app/dashboard/page.tsx) & [authController.js](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/backend/src/controllers/authController.js)): Added **EDIT PROFILE** button in dashboard header card opening an interactive edit profile modal. Allows users to edit Full Name (`name`), Phone Number (`phone`), Avatar Photo (`profileImage`), In-Game Handle (`gameName`), and Character UID (`gameUID`). Form submits to `/api/v1/auth/update-profile` and updates `AuthContext` + `localStorage` real-time.
 - **Cross-Origin-Opener-Policy (COOP) OAuth Fix** ([next.config.js](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/user-frontend/next.config.js) & [server.js](file:///c:/Users/divya/OneDrive/Desktop/tornament-2/backend/server.js)): Configured `Cross-Origin-Opener-Policy: same-origin-allow-popups` headers across frontend Next.js configs and backend Helmet middleware. Prevents browser security warnings (`window.closed call blocked`) when Google OAuth / Identity SDK popups open.
