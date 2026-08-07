@@ -55,4 +55,3 @@ npm run dev:backend   # Express Backend on http://localhost:5000
 npm run dev:user      # User App on http://localhost:3000
 npm run dev:admin     # Admin Portal on http://localhost:3001
 ```
-hello
