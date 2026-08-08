@@ -2,7 +2,7 @@
 
 > **Single Source of Truth** for AI Agents working on the Esports Tournament Platform. Update this document whenever code, configuration, database schema, or project status changes.
 
----
+--
 
 ## 1. Project Overview
 The **Esports Tournament Platform** is a full-stack web ecosystem designed to organize, host, track, and manage competitive gaming tournaments. It features automated match bracket generation, real-time match/lobby updates via WebSockets, live tournament chatrooms, push notification engines, game-wise & multi-dimensional hall of fame leaderboards (`Overall`, `Solo`, `Squad`, `Monthly`, `Weekly`), automated prize distribution, anti-cheat verification pipelines, team/roster hubs, user portals, UPI payment verification engines, 4-stage registration timeline tracking, 15-minute room auto reveal distribution, post-login auto-redirection (`/tournaments`), dual-state Guest vs Logged-In Navbar, permanent email ban enforcement, live real registered user synchronization in admin moderation, real-time UPI payment proof & UTR verification sync, and a comprehensive 6-module administrative control dashboard.
