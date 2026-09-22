@@ -1,58 +1,95 @@
-# Esports Tournament Platform
+<div align="center">
 
-Full-stack esports tournament management platform featuring real-time socket updates, automated match orchestration, user portal, and admin analytics dashboard.
+# ⚡ APEX ESPORTS
 
-## Project Structure
+### Next-Gen Esports Tournament Management Platform
 
-- **`backend/`**: Node.js + Express + MongoDB + Socket.io + JWT API Server
-- **`user-frontend/`**: Next.js (App Router) + Tailwind CSS + Framer Motion Esports Portal
-- **`admin-frontend/`**: Next.js (App Router) + TanStack Table + Chart.js Admin Dashboard
+<p>
+  <img src="https://readme-typing-svg.demolab.com?font=Orbitron&weight=600&size=22&duration=3000&pause=1000&color=FF4500&center=true&vCenter=true&width=700&lines=Compete.+Conquer.+Become+Champion.;Real-Time+Esports+Tournament+Management;Built+for+Competitive+Gaming;Powerful+Admin+%2B+Player+Experience" alt="Typing SVG" />
+</p>
 
-## Quick Start
+<p>
+  <img src="https://img.shields.io/github/stars/ThakurDivyanshsingh-77/APEX-ESPORTS?style=for-the-badge&logo=github&color=black" />
+  <img src="https://img.shields.io/github/forks/ThakurDivyanshsingh-77/APEX-ESPORTS?style=for-the-badge&logo=github&color=black" />
+  <img src="https://img.shields.io/github/last-commit/ThakurDivyanshsingh-77/APEX-ESPORTS?style=for-the-badge&logo=git&color=orange" />
+</p>
 
-### 1. Install Dependencies
-```bash
-# Clone the repo
-git clone https://github.com/ThakurDivyanshsingh-77/apex-esports.git
-cd apex-esports
+<p>
+  <a href="https://apex-esports-zlbc.vercel.app/">
+    <img src="https://img.shields.io/badge/LIVE_DEMO-FF4500?style=for-the-badge&logo=vercel&logoColor=white" />
+  </a>
+  <a href="https://github.com/ThakurDivyanshsingh-77/APEX-ESPORTS">
+    <img src="https://img.shields.io/badge/SOURCE_CODE-111111?style=for-the-badge&logo=github&logoColor=white" />
+  </a>
+</p>
 
-# Install all dependencies across the monorepo
-npm run install:all
-```
+</div>
 
-### Environment Setup
+---
 
-Create `.env` in `backend/` (see `.env.example`):
+## 🎮 About The Project
 
-```env
-MONGO_URI=your_mongodb_atlas_uri
-JWT_SECRET=your_jwt_secret
-CLOUDINARY_CLOUD_NAME=...
-CLOUDINARY_API_KEY=...
-CLOUDINARY_API_SECRET=...
-EMAIL_USER=your_gmail
-EMAIL_PASS=your_app_password
-GOOGLE_CLIENT_ID=...
-GOOGLE_CLIENT_SECRET=...
-```
+**APEX ESPORTS** is a full-stack competitive esports tournament management platform designed for games such as **Free Fire, BGMI, and other multiplayer competitive games**.
 
-Create `.env.local` in `user-frontend/`:
+The platform provides a complete ecosystem for:
 
-```env
-NEXT_PUBLIC_API_URL=http://localhost:5000/api/v1
-NEXT_PUBLIC_GOOGLE_CLIENT_ID=...
-```
+- 🏆 Tournament creation & management
+- 👥 Player & team registration
+- 🎯 Match orchestration
+- ⚡ Real-time match updates
+- 📊 Automated leaderboards
+- 🔐 Secure authentication
+- 🛠️ Powerful admin controls
+- 📈 Tournament analytics
+- 🔔 Real-time notifications
+- ☁️ Cloud-based media management
 
-### Run Locally
+The system is divided into a **Player Portal**, **Admin Dashboard**, and a centralized **Node.js backend**.
 
-```bash
-# All services together (backend + user app + admin portal)
-npm run dev:all
-```
-- Or run services individually:
-```bash
-npm run dev:backend   # Express Backend on http://localhost:5000
-npm run dev:user      # User App on http://localhost:3000
-npm run dev:admin     # Admin Portal on http://localhost:3001
-```
-hello
+---
+
+## ✨ Key Features
+
+### 🏆 Tournament Management
+
+- Create and manage esports tournaments
+- Configure tournament rules
+- Set entry fees and prizes
+- Manage tournament schedules
+- Tournament status management
+- Team registration
+- Player registration
+
+### 🎮 Player Portal
+
+- User registration & login
+- Google authentication
+- Player profile
+- Team management
+- Tournament discovery
+- Tournament registration
+- Match information
+- Live tournament updates
+- Leaderboard tracking
+- Match history
+
+### ⚡ Real-Time System
+
+Powered by **Socket.io** for real-time communication.
+
+```text
+Player
+   │
+   ▼
+Socket Connection
+   │
+   ▼
+Node.js Server
+   │
+   ├── Match Updates
+   ├── Score Updates
+   ├── Tournament Events
+   └── Notifications
+   │
+   ▼
+All Connected Players
